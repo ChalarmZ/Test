@@ -20,7 +20,7 @@ gui.Name = "FoodGui"
 gui.Parent = LocalPlayer.PlayerGui
 
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 260, 0, 450)
+frame.Size = UDim2.new(0, 260, 0, 500)
 frame.Position = UDim2.new(0.5, -130, 0.5, -225)
 frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 frame.BorderSizePixel = 0
@@ -141,14 +141,42 @@ lockBtn.BorderSizePixel = 0
 lockBtn.Parent = frame
 Instance.new("UICorner", lockBtn).CornerRadius = UDim.new(0, 8)
 
+-- ========== AUTO CATCH BTN ==========
+local catchLabel = Instance.new("TextLabel")
+catchLabel.Size = UDim2.new(1, -10, 0, 20)
+catchLabel.Position = UDim2.new(0, 5, 0, 438)
+catchLabel.Text = "🐾 Auto Catch: ปิดอยู่"
+catchLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+catchLabel.BackgroundTransparency = 1
+catchLabel.Font = Enum.Font.Gotham
+catchLabel.TextScaled = true
+catchLabel.Parent = frame
+
+local catchBtn = Instance.new("TextButton")
+catchBtn.Size = UDim2.new(1, -16, 0, 42)
+catchBtn.Position = UDim2.new(0, 8, 0, 458)
+catchBtn.Text = "🐾  Auto Catch Pet"
+catchBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+catchBtn.BackgroundColor3 = Color3.fromRGB(180, 120, 0)
+catchBtn.Font = Enum.Font.GothamBold
+catchBtn.TextScaled = true
+catchBtn.BorderSizePixel = 0
+catchBtn.Parent = frame
+Instance.new("UICorner", catchBtn).CornerRadius = UDim.new(0, 8)
+
 -- ========== LOGIC ==========
 local checkboxes = {}
 local running = false
 local closed = false
 local connections = {}
 local lockRunning = false
+local catchRunning = false
 
-local UpdateProgress = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("UpdateProgress")
+local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+local UpdateProgress = Remotes:WaitForChild("UpdateProgress")
+local ThrowLasso = Remotes:WaitForChild("ThrowLasso")
+local minigameRequest = Remotes:WaitForChild("minigameRequest")
+local petsFolder = workspace:WaitForChild("RoamingPets"):WaitForChild("Pets")
 
 local function getDisplayName(v1)
     local name = v1:GetAttribute("Name")
@@ -254,6 +282,7 @@ end)
 closeBtn.MouseButton1Click:Connect(function()
     closed = true
     lockRunning = false
+    catchRunning = false
     for _, c in next, connections do c:Disconnect() end
     gui:Destroy()
 end)
@@ -310,5 +339,66 @@ lockBtn.MouseButton1Click:Connect(function()
         lockBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 180)
         progressLabel.Text = "🔒 Lock Progress: ปิดอยู่"
         progressLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+    end
+end)
+
+-- ========== AUTO CATCH ==========
+catchBtn.MouseButton1Click:Connect(function()
+    if closed then return end
+    catchRunning = not catchRunning
+    if catchRunning then
+        catchBtn.Text = "⏹  หยุด Auto Catch"
+        catchBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
+        catchLabel.Text = "🐾 Auto Catch: กำลังทำงาน"
+        catchLabel.TextColor3 = Color3.fromRGB(0, 255, 128)
+        task.spawn(function()
+            while catchRunning and not closed do
+                local pets = petsFolder:GetChildren()
+                for _, pet in next, pets do
+                    if not catchRunning or closed then break end
+                    local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                    if not hrp then task.wait(1) continue end
+
+                    local petCF = pet:GetPivot()
+                    hrp.CFrame = petCF * CFrame.new(0, 3, 4)
+                    task.wait(0.3)
+
+                    local dir = (petCF.Position - hrp.Position).Unit
+
+                    pcall(function()
+                        ThrowLasso:FireServer(0.9, dir)
+                    end)
+                    task.wait(0.3)
+
+                    pcall(function()
+                        minigameRequest:InvokeServer(pet, petCF)
+                    end)
+                    task.wait(0.3)
+
+                    -- Lock 75 แยก thread ไม่บล็อก loop จับ
+                    task.spawn(function()
+                        for _ = 1, 10 do
+                            if not catchRunning or closed then break end
+                            pcall(function()
+                                UpdateProgress:FireServer(75)
+                            end)
+                            task.wait(1)
+                        end
+                    end)
+
+                    catchLabel.Text = "🐾 จับ: " .. (pet:GetAttribute("Name") or pet.Name:sub(1,8))
+                    task.wait(0.5)
+                end
+                if #pets == 0 then
+                    catchLabel.Text = "🐾 รอ pet spawn..."
+                    task.wait(1)
+                end
+            end
+        end)
+    else
+        catchBtn.Text = "🐾  Auto Catch Pet"
+        catchBtn.BackgroundColor3 = Color3.fromRGB(180, 120, 0)
+        catchLabel.Text = "🐾 Auto Catch: ปิดอยู่"
+        catchLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
     end
 end)
