@@ -31,19 +31,16 @@ for _, v in next, workspace.PlayerPens:GetChildren() do
             for i, val in next, testValues do
                 print("===== ลอง:", testLabels[i], "| Pet:", v1.Name, "=====")
 
-                -- Totem
                 local totemOk, totemErr = pcall(function()
                     ReplicatedStorage.Remotes.UseTotem:FireServer("Lightning Totem", v1.Name, val)
                 end)
                 print("UseTotem ->", totemOk and "OK" or "ERROR: " .. tostring(totemErr))
 
-                -- Riding
                 local rideOk, rideErr = pcall(function()
                     ReplicatedStorage.Remotes.useRidingPotion:InvokeServer(v1.Name, val)
                 end)
                 print("useRidingPotion ->", rideOk and "OK" or "ERROR: " .. tostring(rideErr))
 
-                -- Flying
                 local flyOk, flyErr = pcall(function()
                     ReplicatedStorage.Remotes.useFlyingPotion:InvokeServer(v1.Name, val)
                 end)
@@ -54,3 +51,29 @@ for _, v in next, workspace.PlayerPens:GetChildren() do
         end
     end
 end
+
+-- ========== SHOVEL TEST ==========
+print("===== START SHOVEL TEST =====")
+local req = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("requestShovels")
+
+pcall(function() req:FireServer() end)
+print("แบบ 1: ไม่มี arg")
+task.wait(1)
+
+pcall(function() req:FireServer("Steel Shovel") end)
+print("แบบ 2: แค่ชื่อ")
+task.wait(1)
+
+pcall(function() req:FireServer(false, "Steel Shovel") end)
+print("แบบ 3: false")
+task.wait(1)
+
+pcall(function() req:FireServer(nil, "Steel Shovel") end)
+print("แบบ 4: nil")
+task.wait(1)
+
+pcall(function() req:FireServer(true, "Steel Shovel") end)
+print("แบบ 5: true ปกติ (baseline)")
+
+print("===== END SHOVEL TEST =====")
+print("ดูใน game ว่า shovel equip ตอนไหนครับ")
