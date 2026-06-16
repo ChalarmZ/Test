@@ -282,4 +282,4 @@ startBtn.MouseButton1Click:Connect(function()
 end)
 
 -- โหลดครั้งแรก
-loadPets()
+loadPets()---1
