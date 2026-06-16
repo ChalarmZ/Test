@@ -2,15 +2,41 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LocalPlayer = Players.LocalPlayer
 
+-- ========== PRINT SYSTEM ==========
+local gui = Instance.new("ScreenGui")
+gui.ResetOnSpawn = false
+gui.Name = "DebugGui"
+gui.Parent = LocalPlayer.PlayerGui
+
+local scrollFrame = Instance.new("ScrollingFrame")
+scrollFrame.Size = UDim2.new(0.4, 0, 0.5, 0)
+scrollFrame.Position = UDim2.new(0, 0, 0.5, 0)
+scrollFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+scrollFrame.BackgroundTransparency = 0.4
+scrollFrame.ScrollBarThickness = 4
+scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+scrollFrame.Parent = gui
+
+local layout = Instance.new("UIListLayout")
+layout.Parent = scrollFrame
+
+local lineCount = 0
+
 local function chatPrint(msg)
-    game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage", {
-        Text = msg,
-        Color = Color3.fromRGB(0, 255, 128),
-        Font = Enum.Font.GothamBold,
-        FontSize = Enum.FontSize.Size18
-    })
+    lineCount = lineCount + 1
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, 0, 0, 20)
+    label.Text = lineCount .. ". " .. msg
+    label.TextColor3 = Color3.fromRGB(0, 255, 128)
+    label.BackgroundTransparency = 1
+    label.TextScaled = true
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = scrollFrame
+    scrollFrame.CanvasSize = UDim2.new(0, 0, 0, lineCount * 20)
+    scrollFrame.CanvasPosition = Vector2.new(0, lineCount * 20)
 end
 
+-- ========== FOODS ==========
 local Foods = {
     "Banana", "Cave Mushroom", "Cosmic Fruit", "Volcanic Fruit",
     "Heart Chocolate", "Bloodmoon Grape", "Tuna Fish", "Dog Treat",
@@ -85,4 +111,3 @@ pcall(function() req:FireServer(true, "Steel Shovel") end)
 chatPrint("แบบ 5: true ปกติ (baseline)")
 
 chatPrint("===== END SHOVEL TEST =====")
-chatPrint("ดูใน game ว่า shovel equip ตอนไหนครับ")
