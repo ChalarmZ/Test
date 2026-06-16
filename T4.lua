@@ -1,10 +1,20 @@
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-local petsFolder = workspace:WaitForChild("RoamingPets"):WaitForChild("Pets")
+
+task.wait(1)
+
+local petsFolder = workspace:WaitForChild("RoamingPets"):WaitForChild("Pets", 10)
+
+if not petsFolder then
+    warn("ไม่เจอ RoamingPets/Pets")
+    return
+end
 
 if LocalPlayer.PlayerGui:FindFirstChild("AttrGui") then
     LocalPlayer.PlayerGui.AttrGui:Destroy()
 end
+
+task.wait(0.1)
 
 local gui = Instance.new("ScreenGui")
 gui.ResetOnSpawn = false
@@ -37,24 +47,18 @@ scroll.Size = UDim2.new(1, -16, 1, -48)
 scroll.Position = UDim2.new(0, 8, 0, 42)
 scroll.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 scroll.BorderSizePixel = 0
-scroll.ScrollBarThickness = 4
-scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+scroll.ScrollBarThickness = 6
+scroll.CanvasSize = UDim2.new(0, 0, 0, 2000)
 scroll.Parent = frame
 Instance.new("UICorner", scroll).CornerRadius = UDim.new(0, 8)
 
 local list = Instance.new("UIListLayout")
-list.Padding = UDim.new(0, 4)
+list.Padding = UDim.new(0, 2)
 list.Parent = scroll
-
-local pad = Instance.new("UIPadding")
-pad.PaddingTop = UDim.new(0, 6)
-pad.PaddingLeft = UDim.new(0, 6)
-pad.PaddingRight = UDim.new(0, 6)
-pad.Parent = scroll
 
 local function addLabel(text, color)
     local lbl = Instance.new("TextLabel")
-    lbl.Size = UDim2.new(1, 0, 0, 22)
+    lbl.Size = UDim2.new(1, -8, 0, 24)
     lbl.BackgroundTransparency = 1
     lbl.Text = text
     lbl.TextColor3 = color or Color3.fromRGB(255, 255, 255)
@@ -62,32 +66,24 @@ local function addLabel(text, color)
     lbl.TextScaled = true
     lbl.TextXAlignment = Enum.TextXAlignment.Left
     lbl.Parent = scroll
-    Instance.new("UIPadding", lbl).PaddingLeft = UDim.new(0, 4)
-    return lbl
 end
 
-local totalLines = 0
 local pets = petsFolder:GetChildren()
+addLabel("พบ " .. #pets .. " pets", Color3.fromRGB(0, 255, 128))
 
 if #pets == 0 then
     addLabel("❌ ไม่มี pet ใน RoamingPets", Color3.fromRGB(255, 80, 80))
-    totalLines = 1
 else
-    for _, pet in next, pets do
-        addLabel("══ " .. pet.Name:sub(1, 20) .. " ══", Color3.fromRGB(255, 200, 0))
-        totalLines += 1
+    for i, pet in next, pets do
+        addLabel("── Pet " .. i .. ": " .. pet.Name:sub(1,20), Color3.fromRGB(255, 200, 0))
         local attrs = pet:GetAttributes()
         local count = 0
-        for attrName, attrValue in next, attrs do
-            addLabel("  " .. attrName .. " = " .. tostring(attrValue), Color3.fromRGB(180, 255, 180))
-            totalLines += 1
+        for k, v in next, attrs do
+            addLabel("   " .. k .. " = " .. tostring(v), Color3.fromRGB(180, 255, 180))
             count += 1
         end
         if count == 0 then
-            addLabel("  (ไม่มี attribute)", Color3.fromRGB(150, 150, 150))
-            totalLines += 1
+            addLabel("   (ไม่มี attribute)", Color3.fromRGB(150, 150, 150))
         end
     end
 end
-
-scroll.CanvasSize = UDim2.new(0, 0, 0, totalLines * 26 + 10)
