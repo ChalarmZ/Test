@@ -66,14 +66,27 @@ Instance.new("UICorner", startBtn).CornerRadius = UDim.new(0, 8)
 
 -- Logic
 local function catchPet(pet)
-    local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
+    local char = LocalPlayer.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    local humanoid = char and char:FindFirstChild("Humanoid")
+    if not hrp or not humanoid then return end
 
     local petCF = pet:GetPivot()
+    local targetPos = (petCF * CFrame.new(0, 0, 4)).Position
 
-    -- Teleport ไปใกล้ pet
-    hrp.CFrame = petCF * CFrame.new(0, 3, 4)
-    task.wait(0.3)
+    -- เดินไปหา pet
+    humanoid:MoveTo(targetPos)
+
+    -- รอจนถึงหรือ timeout 10 วิ
+    local timeout = 10
+    local t = 0
+    while t < timeout do
+        if not catching then return end
+        local dist = (hrp.Position - targetPos).Magnitude
+        if dist < 6 then break end
+        task.wait(0.1)
+        t = t + 0.1
+    end
 
     -- คำนวณ direction
     local dir = (petCF.Position - hrp.Position).Unit
@@ -90,7 +103,7 @@ local function catchPet(pet)
     end)
     task.wait(0.2)
 
-    -- แยก thread ค้าง 75 ไปเรื่อยๆ ไม่บล็อก loop หลัก
+    -- UpdateProgress ค้างที่ 75 แยก thread
     task.spawn(function()
         while catching do
             pcall(function()
@@ -115,14 +128,12 @@ local function catchAllPets()
 
         for _, pet in next, pets do
             if not catching then break end
-
-            status.Text = "⏳ กำลังจับ... (" .. done .. " ตัวแล้ว)"
+            status.Text = "🐾 เดินไปจับ... (" .. done .. " ตัวแล้ว)"
             catchPet(pet)
             done = done + 1
-            task.wait(0.5)
+            task.wait(0.3)
         end
 
-        -- วน loop ใหม่จับตัวที่ spawn มาใหม่
         task.wait(0.5)
     end
 
