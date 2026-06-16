@@ -3,11 +3,13 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LocalPlayer = Players.LocalPlayer
 
 local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+local ThrowLasso = Remotes:WaitForChild("ThrowLasso")
 local minigameRequest = Remotes:WaitForChild("minigameRequest")
+local UpdateProgress = Remotes:WaitForChild("UpdateProgress")
+
 local petsFolder = workspace:WaitForChild("RoamingPets"):WaitForChild("Pets")
 
 local catching = false
-local caughtList = {}
 
 -- GUI
 if LocalPlayer.PlayerGui:FindFirstChild("CatchGui") then
@@ -63,43 +65,70 @@ startBtn.Parent = frame
 Instance.new("UICorner", startBtn).CornerRadius = UDim.new(0, 8)
 
 -- Logic
-local function catchAllPets()
-    local pets = petsFolder:GetChildren()
-    if #pets == 0 then
-        status.Text = "❌ ไม่มี pet ใน RoamingPets"
-        return
-    end
+local function catchPet(pet)
+    local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
 
-    local total = #pets
+    local petCF = pet:GetPivot()
+
+    -- Teleport ไปใกล้ pet
+    hrp.CFrame = petCF * CFrame.new(0, 3, 4)
+    task.wait(0.3)
+
+    -- คำนวณ direction
+    local dir = (petCF.Position - hrp.Position).Unit
+
+    -- ThrowLasso
+    pcall(function()
+        ThrowLasso:FireServer(0.9, dir)
+    end)
+    task.wait(0.3)
+
+    -- minigameRequest
+    pcall(function()
+        minigameRequest:InvokeServer(pet, petCF)
+    end)
+    task.wait(0.2)
+
+    -- แยก thread ค้าง 75 ไปเรื่อยๆ ไม่บล็อก loop หลัก
+    task.spawn(function()
+        while catching do
+            pcall(function()
+                UpdateProgress:FireServer(75)
+            end)
+            task.wait(1)
+        end
+    end)
+end
+
+local function catchAllPets()
     local done = 0
 
-    for _, pet in next, pets do
-        if not catching then break end
+    while catching do
+        local pets = petsFolder:GetChildren()
 
-        task.spawn(function()
-            pcall(function()
-                local args = {
-                    [1] = pet,
-                    [2] = pet:GetPivot()
-                }
-                minigameRequest:InvokeServer(unpack(args))
-            end)
+        if #pets == 0 then
+            status.Text = "⏳ รอ pet spawn..."
+            task.wait(1)
+            continue
+        end
+
+        for _, pet in next, pets do
+            if not catching then break end
+
+            status.Text = "⏳ กำลังจับ... (" .. done .. " ตัวแล้ว)"
+            catchPet(pet)
             done = done + 1
-            if catching then
-                status.Text = "จับแล้ว " .. done .. " / " .. total
-            end
-        end)
+            task.wait(0.5)
+        end
 
-        task.wait(0.5) -- หน่วงระหว่างตัว ปรับได้
+        -- วน loop ใหม่จับตัวที่ spawn มาใหม่
+        task.wait(0.5)
     end
 
-    task.wait(1)
-    if catching then
-        status.Text = "✅ จบแล้ว! จับ " .. done .. " ตัว"
-        catching = false
-        startBtn.Text = "▶  เริ่ม Auto Catch"
-        startBtn.BackgroundColor3 = Color3.fromRGB(0, 180, 80)
-    end
+    status.Text = "⏹ หยุดแล้ว จับไป " .. done .. " ตัว"
+    startBtn.Text = "▶  เริ่ม Auto Catch"
+    startBtn.BackgroundColor3 = Color3.fromRGB(0, 180, 80)
 end
 
 startBtn.MouseButton1Click:Connect(function()
@@ -110,6 +139,7 @@ startBtn.MouseButton1Click:Connect(function()
         status.Text = "⏳ กำลังจับ..."
         task.spawn(catchAllPets)
     else
+        catching = false
         startBtn.Text = "▶  เริ่ม Auto Catch"
         startBtn.BackgroundColor3 = Color3.fromRGB(0, 180, 80)
         status.Text = "⏹ หยุดแล้ว"
