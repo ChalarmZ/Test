@@ -118,7 +118,6 @@ btn.BorderSizePixel = 0
 btn.Parent = frame
 Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
 
--- ========== PROGRESS LOCK ==========
 local progressLabel = Instance.new("TextLabel")
 progressLabel.Size = UDim2.new(1, -10, 0, 20)
 progressLabel.Position = UDim2.new(0, 5, 0, 362)
@@ -141,7 +140,6 @@ lockBtn.BorderSizePixel = 0
 lockBtn.Parent = frame
 Instance.new("UICorner", lockBtn).CornerRadius = UDim.new(0, 8)
 
--- ========== AUTO CATCH BTN ==========
 local catchLabel = Instance.new("TextLabel")
 catchLabel.Size = UDim2.new(1, -10, 0, 20)
 catchLabel.Position = UDim2.new(0, 5, 0, 438)
@@ -317,7 +315,6 @@ btn.MouseButton1Click:Connect(function()
     end
 end)
 
--- ========== LOCK PROGRESS ==========
 lockBtn.MouseButton1Click:Connect(function()
     if closed then return end
     lockRunning = not lockRunning
@@ -342,7 +339,6 @@ lockBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- ========== AUTO CATCH ==========
 catchBtn.MouseButton1Click:Connect(function()
     if closed then return end
     catchRunning = not catchRunning
@@ -354,14 +350,40 @@ catchBtn.MouseButton1Click:Connect(function()
         task.spawn(function()
             while catchRunning and not closed do
                 local pets = petsFolder:GetChildren()
+                if #pets == 0 then
+                    catchLabel.Text = "🐾 รอ pet spawn..."
+                    task.wait(1)
+                    continue
+                end
                 for _, pet in next, pets do
                     if not catchRunning or closed then break end
-                    local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                    if not hrp then task.wait(1) continue end
+
+                    local char = LocalPlayer.Character
+                    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                    local humanoid = char and char:FindFirstChild("Humanoid")
+                    if not hrp or not humanoid then task.wait(1) continue end
 
                     local petCF = pet:GetPivot()
-                    hrp.CFrame = petCF * CFrame.new(0, 3, 4)
-                    task.wait(0.3)
+                    local targetPos = (petCF * CFrame.new(0, 0, 4)).Position
+                    local petName = pet:GetAttribute("Name") or pet.Name:sub(1, 8)
+
+                    catchLabel.Text = "🚶 เดินไปหา " .. petName
+
+                    -- เดินไปหา pet
+                    humanoid:MoveTo(targetPos)
+
+                    -- รอจนถึงหรือ timeout 10 วิ
+                    local t = 0
+                    while t < 10 do
+                        if not catchRunning or closed then break end
+                        if (hrp.Position - targetPos).Magnitude < 6 then break end
+                        task.wait(0.1)
+                        t += 0.1
+                    end
+
+                    if not catchRunning or closed then break end
+
+                    catchLabel.Text = "🎯 จับ " .. petName
 
                     local dir = (petCF.Position - hrp.Position).Unit
 
@@ -375,7 +397,7 @@ catchBtn.MouseButton1Click:Connect(function()
                     end)
                     task.wait(0.3)
 
-                    -- Lock 75 แยก thread ไม่บล็อก loop จับ
+                    -- UpdateProgress 75 แยก thread ไม่บล็อก loop
                     task.spawn(function()
                         for _ = 1, 10 do
                             if not catchRunning or closed then break end
@@ -386,12 +408,7 @@ catchBtn.MouseButton1Click:Connect(function()
                         end
                     end)
 
-                    catchLabel.Text = "🐾 จับ: " .. (pet:GetAttribute("Name") or pet.Name:sub(1,8))
                     task.wait(0.5)
-                end
-                if #pets == 0 then
-                    catchLabel.Text = "🐾 รอ pet spawn..."
-                    task.wait(1)
                 end
             end
         end)
