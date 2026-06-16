@@ -30,6 +30,7 @@ for _, v in next, workspace.PlayerPens:GetChildren() do
         for _, v1 in next, v.Pets:GetChildren() do
             for i, val in next, testValues do
                 print("===== ลอง:", testLabels[i], "| Pet:", v1.Name, "=====")
+
                 -- Totem
                 local totemOk, totemErr = pcall(function()
                     ReplicatedStorage.Remotes.UseTotem:FireServer("Lightning Totem", v1.Name, val)
@@ -53,5 +54,3 @@ for _, v in next, workspace.PlayerPens:GetChildren() do
         end
     end
 end
-
-print("===== TEST DONE =====")
