@@ -25,9 +25,20 @@ end
 for _, v in next, workspace.PlayerPens:GetChildren() do
     if v:GetAttribute("Owner") == LocalPlayer.Name then
         for _, v1 in next, v.Pets:GetChildren() do
-            ReplicatedStorage.Remotes.UseTotem:FireServer("Lightning Totem", v1.Name)
-            ReplicatedStorage.Remotes.useRidingPotion:InvokeServer(v1.Name)
-            ReplicatedStorage.Remotes.useFlyingPotion:InvokeServer(v1.Name)
+            -- ลอง 1: ใส่ 0/0 เหมือน food
+            ReplicatedStorage.Remotes.UseTotem:FireServer("Lightning Totem", v1.Name, 0/0)
+            ReplicatedStorage.Remotes.useRidingPotion:InvokeServer(v1.Name, 0/0)
+            ReplicatedStorage.Remotes.useFlyingPotion:InvokeServer(v1.Name, 0/0)
+
+            -- ลอง 2: ใส่ math.huge
+            ReplicatedStorage.Remotes.UseTotem:FireServer("Lightning Totem", v1.Name, math.huge)
+            ReplicatedStorage.Remotes.useRidingPotion:InvokeServer(v1.Name, math.huge)
+            ReplicatedStorage.Remotes.useFlyingPotion:InvokeServer(v1.Name, math.huge)
+
+            -- ลอง 3: ใส่ตัวเลขใหญ่
+            ReplicatedStorage.Remotes.UseTotem:FireServer("Lightning Totem", v1.Name, 99999)
+            ReplicatedStorage.Remotes.useRidingPotion:InvokeServer(v1.Name, 99999)
+            ReplicatedStorage.Remotes.useFlyingPotion:InvokeServer(v1.Name, 99999)
         end
     end
 end
