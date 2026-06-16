@@ -20,8 +20,8 @@ gui.Name = "FoodGui"
 gui.Parent = LocalPlayer.PlayerGui
 
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 260, 0, 500)
-frame.Position = UDim2.new(0.5, -130, 0.5, -225)
+frame.Size = UDim2.new(0, 260, 0, 580)
+frame.Position = UDim2.new(0.5, -130, 0.5, -290)
 frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 frame.BorderSizePixel = 0
 frame.Active = true
@@ -140,9 +140,82 @@ lockBtn.BorderSizePixel = 0
 lockBtn.Parent = frame
 Instance.new("UICorner", lockBtn).CornerRadius = UDim.new(0, 8)
 
+-- ========== RARITY FILTER ==========
+local rarityLabel = Instance.new("TextLabel")
+rarityLabel.Size = UDim2.new(1, -10, 0, 20)
+rarityLabel.Position = UDim2.new(0, 5, 0, 438)
+rarityLabel.Text = "🎯 Catch Rarity Filter:"
+rarityLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+rarityLabel.BackgroundTransparency = 1
+rarityLabel.Font = Enum.Font.GothamBold
+rarityLabel.TextScaled = true
+rarityLabel.Parent = frame
+
+local Rarities = {"Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic", "Divine", "Secret"}
+local rarityColors = {
+    Common    = Color3.fromRGB(150, 150, 150),
+    Uncommon  = Color3.fromRGB(80, 200, 80),
+    Rare      = Color3.fromRGB(80, 120, 220),
+    Epic      = Color3.fromRGB(160, 80, 220),
+    Legendary = Color3.fromRGB(220, 160, 0),
+    Mythic    = Color3.fromRGB(220, 80, 80),
+    Divine    = Color3.fromRGB(80, 220, 220),
+    Secret    = Color3.fromRGB(255, 100, 200),
+}
+local selectedRarities = {}
+local rarityBtns = {}
+
+local rarityScroll = Instance.new("ScrollingFrame")
+rarityScroll.Size = UDim2.new(1, -16, 0, 60)
+rarityScroll.Position = UDim2.new(0, 8, 0, 460)
+rarityScroll.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+rarityScroll.BorderSizePixel = 0
+rarityScroll.ScrollBarThickness = 3
+rarityScroll.ScrollingDirection = Enum.ScrollingDirection.X
+rarityScroll.CanvasSize = UDim2.new(0, #Rarities * 80, 0, 0)
+rarityScroll.Parent = frame
+Instance.new("UICorner", rarityScroll).CornerRadius = UDim.new(0, 8)
+
+local rarityList = Instance.new("UIListLayout")
+rarityList.FillDirection = Enum.FillDirection.Horizontal
+rarityList.Padding = UDim.new(0, 4)
+rarityList.Parent = rarityScroll
+
+local rarityPad = Instance.new("UIPadding")
+rarityPad.PaddingLeft = UDim.new(0, 4)
+rarityPad.PaddingTop = UDim.new(0, 6)
+rarityPad.Parent = rarityScroll
+
+for _, rarity in next, Rarities do
+    local rb = Instance.new("TextButton")
+    rb.Size = UDim2.new(0, 74, 0, 44)
+    rb.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    rb.Text = rarity
+    rb.TextColor3 = rarityColors[rarity] or Color3.fromRGB(255,255,255)
+    rb.Font = Enum.Font.GothamBold
+    rb.TextScaled = true
+    rb.BorderSizePixel = 0
+    rb.Parent = rarityScroll
+    Instance.new("UICorner", rb).CornerRadius = UDim.new(0, 6)
+
+    rarityBtns[rarity] = rb
+    selectedRarities[rarity] = false
+
+    rb.MouseButton1Click:Connect(function()
+        selectedRarities[rarity] = not selectedRarities[rarity]
+        if selectedRarities[rarity] then
+            rb.BackgroundColor3 = rarityColors[rarity] or Color3.fromRGB(100,100,100)
+            rb.TextColor3 = Color3.fromRGB(255,255,255)
+        else
+            rb.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+            rb.TextColor3 = rarityColors[rarity] or Color3.fromRGB(255,255,255)
+        end
+    end)
+end
+
 local catchLabel = Instance.new("TextLabel")
 catchLabel.Size = UDim2.new(1, -10, 0, 20)
-catchLabel.Position = UDim2.new(0, 5, 0, 438)
+catchLabel.Position = UDim2.new(0, 5, 0, 528)
 catchLabel.Text = "🐾 Auto Catch: ปิดอยู่"
 catchLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
 catchLabel.BackgroundTransparency = 1
@@ -152,7 +225,7 @@ catchLabel.Parent = frame
 
 local catchBtn = Instance.new("TextButton")
 catchBtn.Size = UDim2.new(1, -16, 0, 42)
-catchBtn.Position = UDim2.new(0, 8, 0, 458)
+catchBtn.Position = UDim2.new(0, 8, 0, 530)
 catchBtn.Text = "🐾  Auto Catch Pet"
 catchBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 catchBtn.BackgroundColor3 = Color3.fromRGB(180, 120, 0)
@@ -341,11 +414,22 @@ end)
 
 catchBtn.MouseButton1Click:Connect(function()
     if closed then return end
+
+    -- เช็คว่าเลือก rarity ไว้ไหม
+    local anySelected = false
+    for _, v in next, selectedRarities do
+        if v then anySelected = true break end
+    end
+    if not anySelected then
+        catchLabel.Text = "⚠️ เลือก Rarity ก่อนนะ!"
+        catchLabel.TextColor3 = Color3.fromRGB(255, 80, 80)
+        return
+    end
+
     catchRunning = not catchRunning
     if catchRunning then
         catchBtn.Text = "⏹  หยุด Auto Catch"
         catchBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
-        catchLabel.Text = "🐾 Auto Catch: กำลังทำงาน"
         catchLabel.TextColor3 = Color3.fromRGB(0, 255, 128)
         task.spawn(function()
             while catchRunning and not closed do
@@ -358,32 +442,19 @@ catchBtn.MouseButton1Click:Connect(function()
                 for _, pet in next, pets do
                     if not catchRunning or closed then break end
 
-                    local char = LocalPlayer.Character
-                    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-                    local humanoid = char and char:FindFirstChild("Humanoid")
-                    if not hrp or not humanoid then task.wait(1) continue end
+                    local rarity = pet:GetAttribute("Rarity") or ""
+                    if not selectedRarities[rarity] then continue end
+
+                    local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                    if not hrp then task.wait(1) continue end
 
                     local petCF = pet:GetPivot()
-                    local targetPos = (petCF * CFrame.new(0, 0, 4)).Position
-                    local petName = pet:GetAttribute("Name") or pet.Name:sub(1, 8)
+                    local petName = pet:GetAttribute("Name") or pet.Name:sub(1,8)
 
-                    catchLabel.Text = "🚶 เดินไปหา " .. petName
+                    catchLabel.Text = "✨ จับ [" .. rarity .. "] " .. petName
 
-                    -- เดินไปหา pet
-                    humanoid:MoveTo(targetPos)
-
-                    -- รอจนถึงหรือ timeout 10 วิ
-                    local t = 0
-                    while t < 10 do
-                        if not catchRunning or closed then break end
-                        if (hrp.Position - targetPos).Magnitude < 6 then break end
-                        task.wait(0.1)
-                        t += 0.1
-                    end
-
-                    if not catchRunning or closed then break end
-
-                    catchLabel.Text = "🎯 จับ " .. petName
+                    hrp.CFrame = petCF * CFrame.new(0, 3, 4)
+                    task.wait(0.3)
 
                     local dir = (petCF.Position - hrp.Position).Unit
 
@@ -397,7 +468,6 @@ catchBtn.MouseButton1Click:Connect(function()
                     end)
                     task.wait(0.3)
 
-                    -- UpdateProgress 75 แยก thread ไม่บล็อก loop
                     task.spawn(function()
                         for _ = 1, 10 do
                             if not catchRunning or closed then break end
@@ -410,6 +480,7 @@ catchBtn.MouseButton1Click:Connect(function()
 
                     task.wait(0.5)
                 end
+                task.wait(0.5)
             end
         end)
     else
