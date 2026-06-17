@@ -140,7 +140,6 @@ lockBtn.BorderSizePixel = 0
 lockBtn.Parent = frame
 Instance.new("UICorner", lockBtn).CornerRadius = UDim.new(0, 8)
 
--- ========== RARITY FILTER ==========
 local rarityLabel = Instance.new("TextLabel")
 rarityLabel.Size = UDim2.new(1, -10, 0, 20)
 rarityLabel.Position = UDim2.new(0, 5, 0, 438)
@@ -197,10 +196,8 @@ for _, rarity in next, Rarities do
     rb.BorderSizePixel = 0
     rb.Parent = rarityScroll
     Instance.new("UICorner", rb).CornerRadius = UDim.new(0, 6)
-
     rarityBtns[rarity] = rb
     selectedRarities[rarity] = false
-
     rb.MouseButton1Click:Connect(function()
         selectedRarities[rarity] = not selectedRarities[rarity]
         if selectedRarities[rarity] then
@@ -277,7 +274,6 @@ local function loadPets()
                 local rarity = v1:GetAttribute("Rarity") or ""
                 local isSelected = prevSelected[petName]
                 if isSelected == nil then isSelected = true end
-
                 local cb = Instance.new("TextButton")
                 cb.Size = UDim2.new(1, 0, 0, 30)
                 cb.BackgroundColor3 = isSelected and Color3.fromRGB(50, 50, 50) or Color3.fromRGB(35, 35, 35)
@@ -398,9 +394,7 @@ lockBtn.MouseButton1Click:Connect(function()
         progressLabel.TextColor3 = Color3.fromRGB(0, 255, 128)
         task.spawn(function()
             while lockRunning and not closed do
-                pcall(function()
-                    UpdateProgress:FireServer(75)
-                end)
+                pcall(function() UpdateProgress:FireServer(75) end)
                 task.wait(1)
             end
         end)
@@ -414,8 +408,6 @@ end)
 
 catchBtn.MouseButton1Click:Connect(function()
     if closed then return end
-
-    -- เช็คว่าเลือก rarity ไว้ไหม
     local anySelected = false
     for _, v in next, selectedRarities do
         if v then anySelected = true break end
@@ -425,7 +417,6 @@ catchBtn.MouseButton1Click:Connect(function()
         catchLabel.TextColor3 = Color3.fromRGB(255, 80, 80)
         return
     end
-
     catchRunning = not catchRunning
     if catchRunning then
         catchBtn.Text = "⏹  หยุด Auto Catch"
@@ -441,46 +432,41 @@ catchBtn.MouseButton1Click:Connect(function()
                 end
                 for _, pet in next, pets do
                     if not catchRunning or closed then break end
-
                     local rarity = pet:GetAttribute("Rarity") or ""
                     if not selectedRarities[rarity] then continue end
-
                     local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
                     if not hrp then task.wait(1) continue end
-
                     local petCF = pet:GetPivot()
                     local petName = pet:GetAttribute("Name") or pet.Name:sub(1,8)
-
                     catchLabel.Text = "✨ จับ [" .. rarity .. "] " .. petName
-
                     hrp.CFrame = petCF * CFrame.new(0, 3, 4)
                     task.wait(0.3)
-
                     local dir = (petCF.Position - hrp.Position).Unit
-
                     pcall(function()
                         ThrowLasso:FireServer(0.9, dir)
                     end)
                     task.wait(0.3)
-
                     pcall(function()
                         minigameRequest:InvokeServer(pet, petCF)
                     end)
+                    -- ส่ง 75 ไปเรื่อยๆ จนกว่า pet จะหายหรือหยุด
+                    local startTime = tick()
+                    while catchRunning and not closed and pet and pet.Parent do
+                        pcall(function()
+                            UpdateProgress:FireServer(75)
+                        end)
+                        task.wait(0.5)
+                        if tick() - startTime > 15 then break end
+                    end
                     task.wait(0.3)
-
-                    task.spawn(function()
-                        for _ = 1, 10 do
-                            if not catchRunning or closed then break end
-                            pcall(function()
-                                UpdateProgress:FireServer(75)
-                            end)
-                            task.wait(1)
-                        end
-                    end)
-
-                    task.wait(0.5)
                 end
-                task.wait(0.5)
+                task.wait(0.3)
+            end
+            if not closed then
+                catchBtn.Text = "🐾  Auto Catch Pet"
+                catchBtn.BackgroundColor3 = Color3.fromRGB(180, 120, 0)
+                catchLabel.Text = "🐾 Auto Catch: ปิดอยู่"
+                catchLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
             end
         end)
     else
@@ -489,4 +475,4 @@ catchBtn.MouseButton1Click:Connect(function()
         catchLabel.Text = "🐾 Auto Catch: ปิดอยู่"
         catchLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
     end
-end)
+end)---1
