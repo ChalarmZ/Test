@@ -186,7 +186,7 @@ catchBtn.MouseButton1Click:Connect(function()
                     local t = tick()
                     while catchRunning and not closed and pet and pet.Parent do
                         pcall(function() UpdateProgress:FireServer(75) end)
-                        task.wait(0.5); if tick()-t > 15 then break end
+                        task.wait(0.5); if tick()-t > 5 then break end
                     end
                     task.wait(0.3)
                 end
