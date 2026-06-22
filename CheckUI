@@ -1,178 +1,21 @@
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
-if LocalPlayer.PlayerGui:FindFirstChild("CheckGui") then
-    LocalPlayer.PlayerGui.CheckGui:Destroy()
-end
-
 local gui = Instance.new("ScreenGui")
+gui.Name = "TestGui"
 gui.ResetOnSpawn = false
-gui.Name = "CheckGui"
 gui.Parent = LocalPlayer.PlayerGui
 
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 380, 0, 500)
-frame.Position = UDim2.new(0.5, -190, 0.5, -250)
-frame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-frame.BorderSizePixel = 0
-frame.Active = true
-frame.Draggable = true
+frame.Size = UDim2.new(0, 200, 0, 100)
+frame.Position = UDim2.new(0.5, -100, 0.5, -50)
+frame.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
 frame.Parent = gui
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 10)
 
-local titlebar = Instance.new("Frame")
-titlebar.Size = UDim2.new(1, 0, 0, 40)
-titlebar.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
-titlebar.BorderSizePixel = 0
-titlebar.Parent = frame
-Instance.new("UICorner", titlebar).CornerRadius = UDim.new(0, 10)
-
-local titleTxt = Instance.new("TextLabel")
-titleTxt.Size = UDim2.new(1, -50, 1, 0)
-titleTxt.Position = UDim2.new(0, 10, 0, 0)
-titleTxt.Text = "🔍 Pet Attribute Checker"
-titleTxt.TextColor3 = Color3.fromRGB(255, 255, 255)
-titleTxt.Font = Enum.Font.GothamBold
-titleTxt.TextScaled = true
-titleTxt.BackgroundTransparency = 1
-titleTxt.TextXAlignment = Enum.TextXAlignment.Left
-titleTxt.Parent = titlebar
-
-local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0, 30, 0, 30)
-closeBtn.Position = UDim2.new(1, -35, 0, 5)
-closeBtn.Text = "✕"
-closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-closeBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-closeBtn.Font = Enum.Font.GothamBold
-closeBtn.TextScaled = true
-closeBtn.BorderSizePixel = 0
-closeBtn.Parent = titlebar
-Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(1, 0)
-closeBtn.MouseButton1Click:Connect(function() gui:Destroy() end)
-
-local statusLbl = Instance.new("TextLabel")
-statusLbl.Size = UDim2.new(1, -16, 0, 28)
-statusLbl.Position = UDim2.new(0, 8, 0, 46)
-statusLbl.Text = "กด สแกน เพื่อเริ่ม"
-statusLbl.TextColor3 = Color3.fromRGB(0, 220, 120)
-statusLbl.BackgroundColor3 = Color3.fromRGB(20, 35, 25)
-statusLbl.Font = Enum.Font.Gotham
-statusLbl.TextScaled = true
-statusLbl.BorderSizePixel = 0
-statusLbl.Parent = frame
-Instance.new("UICorner", statusLbl).CornerRadius = UDim.new(0, 6)
-
-local scroll = Instance.new("ScrollingFrame")
-scroll.Size = UDim2.new(1, -16, 0, 350)
-scroll.Position = UDim2.new(0, 8, 0, 82)
-scroll.BackgroundColor3 = Color3.fromRGB(25, 25, 38)
-scroll.BorderSizePixel = 0
-scroll.ScrollBarThickness = 4
-scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-scroll.Parent = frame
-Instance.new("UICorner", scroll).CornerRadius = UDim.new(0, 8)
-
-local ll = Instance.new("UIListLayout")
-ll.Padding = UDim.new(0, 2)
-ll.Parent = scroll
-
-local pp = Instance.new("UIPadding")
-pp.PaddingTop = UDim.new(0, 4)
-pp.PaddingLeft = UDim.new(0, 6)
-pp.PaddingRight = UDim.new(0, 6)
-pp.Parent = scroll
-
-ll.Changed:Connect(function()
-    scroll.CanvasSize = UDim2.new(0, 0, 0, ll.AbsoluteContentSize.Y + 12)
-end)
-
-local runBtn = Instance.new("TextButton")
-runBtn.Size = UDim2.new(1, -16, 0, 40)
-runBtn.Position = UDim2.new(0, 8, 1, -48)
-runBtn.Text = "▶  สแกน Attributes"
-runBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-runBtn.BackgroundColor3 = Color3.fromRGB(0, 140, 80)
-runBtn.Font = Enum.Font.GothamBold
-runBtn.TextScaled = true
-runBtn.BorderSizePixel = 0
-runBtn.Parent = frame
-Instance.new("UICorner", runBtn).CornerRadius = UDim.new(0, 8)
-
-local function addLine(text, color, indent)
-    local l = Instance.new("TextLabel")
-    l.Size = UDim2.new(1, 0, 0, 22)
-    l.Text = (indent and "   " or "") .. text
-    l.TextColor3 = color or Color3.fromRGB(200, 200, 200)
-    l.BackgroundTransparency = 1
-    l.Font = Enum.Font.Gotham
-    l.TextSize = 13
-    l.TextXAlignment = Enum.TextXAlignment.Left
-    l.BorderSizePixel = 0
-    l.Parent = scroll
-end
-
-runBtn.MouseButton1Click:Connect(function()
-    for _, c in next, scroll:GetChildren() do
-        if c:IsA("TextLabel") then c:Destroy() end
-    end
-
-    statusLbl.Text = "⏳ กำลังสแกน..."
-
-    local count = 0
-    local pens = workspace:FindFirstChild("PlayerPens")
-
-    if not pens then
-        addLine("❌ ไม่เจอ workspace.PlayerPens", Color3.fromRGB(255, 80, 80))
-        statusLbl.Text = "❌ ไม่เจอ PlayerPens"
-        return
-    end
-
-    -- แสดง owner ทั้งหมดที่เจอก่อนเพื่อ debug
-    addLine("=== Owners ที่เจอ ===", Color3.fromRGB(255, 200, 0))
-    for _, v in next, pens:GetChildren() do
-        local o = v:GetAttribute("Owner") or "(ไม่มี Owner attr)"
-        addLine(tostring(v.Name) .. " → " .. tostring(o), Color3.fromRGB(180, 180, 100))
-    end
-    addLine("LocalPlayer.Name = " .. LocalPlayer.Name, Color3.fromRGB(0, 220, 255))
-    addLine("========================", Color3.fromRGB(100, 100, 100))
-
-    for _, v in next, pens:GetChildren() do
-        local owner = v:GetAttribute("Owner")
-        if owner == LocalPlayer.Name then
-            local petsFolder = v:FindFirstChild("Pets")
-            if not petsFolder then
-                addLine("(ไม่เจอ folder Pets ใน " .. v.Name .. ")", Color3.fromRGB(255,150,50))
-                continue
-            end
-            for _, v1 in next, petsFolder:GetChildren() do
-                count += 1
-                local petName = v1:GetAttribute("Name") or v1.Name:sub(1, 12)
-                addLine("══ " .. petName .. " ══", Color3.fromRGB(100, 180, 255))
-                local attrs = v1:GetAttributes()
-                local found = false
-                for k, val in next, attrs do
-                    found = true
-                    local color = Color3.fromRGB(180, 180, 180)
-                    local kl = k:lower()
-                    if kl:find("rarity") then color = Color3.fromRGB(220, 180, 80)
-                    elseif kl:find("name") then color = Color3.fromRGB(255, 255, 255)
-                    elseif kl:find("mutation") then color = Color3.fromRGB(255, 150, 50)
-                    elseif kl:find("level") or kl:find("xp") then color = Color3.fromRGB(100, 220, 255)
-                    end
-                    addLine(k .. " = " .. tostring(val), color, true)
-                end
-                if not found then
-                    addLine("(ไม่มี attributes เลย)", Color3.fromRGB(100, 100, 100), true)
-                end
-            end
-        end
-    end
-
-    if count == 0 then
-        addLine("❌ ไม่พบ pet เลย", Color3.fromRGB(255, 80, 80))
-        statusLbl.Text = "❌ ไม่เจอ pet"
-    else
-        statusLbl.Text = "✅ พบ " .. count .. " pets"
-    end
-end)
+local lbl = Instance.new("TextLabel")
+lbl.Size = UDim2.new(1, 0, 1, 0)
+lbl.Text = "TEST OK"
+lbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+lbl.TextScaled = true
+lbl.BackgroundTransparency = 1
+lbl.Parent = frame
