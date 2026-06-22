@@ -145,26 +145,25 @@ addBtn(feedPage, "▶  เริ่มให้อาหาร", Color3.fromRGB(
         local total = 0
         for _, food in next, Foods do
             if not running then break end
-            -- วนให้อาหารชนิดนี้จนกว่า pet ทุกตัวจะติด mutation ของมันหมด
             local keepGoing = true
             while keepGoing and running do
                 keepGoing = false
                 for _, pet in next, myPets do
                     if not running then break end
+                    task.wait(0.05)
                     local mutation = pet:GetAttribute("Mutation") or ""
                     local blocked = MutationFoodMap[mutation]
                     if blocked == food then
-                        -- ติดแล้ว ข้ามตัวนี้
+                        feedStatus.Text = "⏭ " .. getDisplayName(pet) .. " ติด " .. mutation .. " แล้ว"
                         continue
                     end
-                    -- ยังไม่ติด → ให้ต่อ และยังต้องวนอีก
                     keepGoing = true
                     pcall(function()
                         ReplicatedStorage.Packages._Index["sleitnick_knit@1.7.0"].knit.Services.FoodService.RF.FeedPet:InvokeServer(food, pet.Name, 0/0)
                     end)
                     total += 1
                     feedStatus.Text = food .. " → " .. getDisplayName(pet)
-                    task.wait()
+                    task.wait(0.5) -- รอให้ server อัพเดต attribute กลับมา
                 end
             end
             feedStatus.Text = "✅ " .. food .. " ครบ → ถัดไป"
@@ -252,4 +251,4 @@ closeB.MouseButton1Click:Connect(function()
     closed=true; running=false; lockRunning=false; catchRunning=false; gui:Destroy()
 end)
 
-tabBtns["Feed"].btn:MouseButton1Click()----2
+tabBtns["Feed"].btn:MouseButton1Click()
