@@ -65,7 +65,7 @@ statusLbl.Parent = win
 Instance.new("UICorner", statusLbl).CornerRadius = UDim.new(0,6)
 
 local scroll = Instance.new("ScrollingFrame")
-scroll.Size = UDim2.new(1,-16,0,340)
+scroll.Size = UDim2.new(1,-16,0,290)
 scroll.Position = UDim2.new(0,8,0,82)
 scroll.BackgroundColor3 = Color3.fromRGB(25,25,38)
 scroll.BorderSizePixel = 0
@@ -86,9 +86,22 @@ ll.Changed:Connect(function()
     scroll.CanvasSize = UDim2.new(0,0,0,ll.AbsoluteContentSize.Y+12)
 end)
 
+-- ปุ่ม Copy
+local copyBtn = Instance.new("TextButton")
+copyBtn.Size = UDim2.new(1,-16,0,36)
+copyBtn.Position = UDim2.new(0,8,1,-92)
+copyBtn.Text = "📋  Copy Output"
+copyBtn.TextColor3 = Color3.fromRGB(255,255,255)
+copyBtn.BackgroundColor3 = Color3.fromRGB(60,80,160)
+copyBtn.Font = Enum.Font.GothamBold
+copyBtn.TextScaled = true
+copyBtn.BorderSizePixel = 0
+copyBtn.Parent = win
+Instance.new("UICorner", copyBtn).CornerRadius = UDim.new(0,8)
+
 local runBtn = Instance.new("TextButton")
-runBtn.Size = UDim2.new(1,-16,0,40)
-runBtn.Position = UDim2.new(0,8,1,-48)
+runBtn.Size = UDim2.new(1,-16,0,36)
+runBtn.Position = UDim2.new(0,8,1,-50)
 runBtn.Text = "▶  สแกน"
 runBtn.TextColor3 = Color3.fromRGB(255,255,255)
 runBtn.BackgroundColor3 = Color3.fromRGB(0,140,80)
@@ -98,7 +111,10 @@ runBtn.BorderSizePixel = 0
 runBtn.Parent = win
 Instance.new("UICorner", runBtn).CornerRadius = UDim.new(0,8)
 
+local outputLines = {}
+
 local function addLine(text, color)
+    table.insert(outputLines, text)
     local l = Instance.new("TextLabel")
     l.Size = UDim2.new(1,0,0,22)
     l.Text = text
@@ -111,14 +127,33 @@ local function addLine(text, color)
     l.Parent = scroll
 end
 
+copyBtn.MouseButton1Click:Connect(function()
+    if #outputLines == 0 then
+        statusLbl.Text = "⚠️ สแกนก่อนนะ!"
+        return
+    end
+    local result = table.concat(outputLines, "\n")
+    setclipboard(result)
+    copyBtn.Text = "✅  Copied!"
+    copyBtn.BackgroundColor3 = Color3.fromRGB(0,130,70)
+    task.wait(2)
+    copyBtn.Text = "📋  Copy Output"
+    copyBtn.BackgroundColor3 = Color3.fromRGB(60,80,160)
+end)
+
 runBtn.MouseButton1Click:Connect(function()
     for _, c in next, scroll:GetChildren() do
         if c:IsA("TextLabel") then c:Destroy() end
     end
+    outputLines = {}
     statusLbl.Text = "⏳ สแกนอยู่..."
 
     local pens = workspace:FindFirstChild("PlayerPens")
-    if not pens then addLine("❌ ไม่เจอ PlayerPens", Color3.fromRGB(255,80,80)); return end
+    if not pens then
+        addLine("❌ ไม่เจอ PlayerPens", Color3.fromRGB(255,80,80))
+        statusLbl.Text = "❌ ไม่เจอ PlayerPens"
+        return
+    end
 
     local count = 0
     for _, pen in next, pens:GetChildren() do
