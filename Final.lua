@@ -5,26 +5,26 @@ local LocalPlayer = Players.LocalPlayer
 local Foods = {"Banana","Cave Mushroom","Cosmic Fruit","Volcanic Fruit","Heart Chocolate","Bloodmoon Grape","Tuna Fish","Dog Treat","Taco","Alien Fruit","Chocolate Egg","Radioactive Strawberry","Cotton Candy","Waffle","Star","Bag Of Worms","Pepper","Abyss Crystal","Rocky Cookie","Mango"}
 
 local MutationFoodMap = {
-    Dusty        = "Banana",
-    Cavern       = "Cave Mushroom",
-    Cosmic       = "Cosmic Fruit",
-    Volcanic     = "Volcanic Fruit",
-    Lovestruck   = "Heart Chocolate",
-    Bloodmoon    = "Bloodmoon Grape",
-    Clawed       = "Tuna Fish",
-    Fluffy       = "Dog Treat",
-    Taco         = "Taco",
-    Alien        = "Alien Fruit",
-    Easter       = "Chocolate Egg",
-    Abducted     = "Radioactive Strawberry",
-    Candy        = "Cotton Candy",
-    ["Steam Punk"]   = "Waffle",
-    Stary        = "Star",
-    Tidal        = "Bag Of Worms",
-    Spiced       = "Pepper",
-    Void         = "Abyss Crystal",
-    Rocky        = "Rocky Cookie",
-    Tropical     = "Mango"
+    Dusty          = "Banana",
+    Cavern         = "Cave Mushroom",
+    Cosmic         = "Cosmic Fruit",
+    Volcanic       = "Volcanic Fruit",
+    Lovestruck     = "Heart Chocolate",
+    Bloodmoon      = "Bloodmoon Grape",
+    Clawed         = "Tuna Fish",
+    Fluffy         = "Dog Treat",
+    Taco           = "Taco",
+    Alien          = "Alien Fruit",
+    Easter         = "Chocolate Egg",
+    Abducted       = "Radioactive Strawberry",
+    Candy          = "Cotton Candy",
+    ["Steam Punk"] = "Waffle",
+    Stary          = "Star",
+    Tidal          = "Bag Of Worms",
+    Spiced         = "Pepper",
+    Void           = "Abyss Crystal",
+    Rocky          = "Rocky Cookie",
+    Tropical       = "Mango",
 }
 
 local Remotes = ReplicatedStorage:WaitForChild("Remotes")
@@ -49,7 +49,6 @@ local function getMyPets()
     return t
 end
 
--- ========== GUI ==========
 if LocalPlayer.PlayerGui:FindFirstChild("ChalarmGui") then LocalPlayer.PlayerGui.ChalarmGui:Destroy() end
 local gui = Instance.new("ScreenGui"); gui.ResetOnSpawn = false; gui.Name = "ChalarmGui"; gui.Parent = LocalPlayer.PlayerGui
 
@@ -69,9 +68,9 @@ local function makeTitleBtn(pos, color, symbol)
     local b = Instance.new("TextButton"); b.Size = UDim2.new(0,24,0,24); b.Position = pos; b.Text = symbol; b.TextColor3 = Color3.fromRGB(255,255,255); b.BackgroundColor3 = color; b.Font = Enum.Font.GothamBold; b.TextSize = 12; b.BorderSizePixel = 0; b.Parent = titlebar
     Instance.new("UICorner", b).CornerRadius = UDim.new(1,0); return b
 end
-local minBtn  = makeTitleBtn(UDim2.new(1,-86,0,8), Color3.fromRGB(255,189,68), "─")
-local maxBtn  = makeTitleBtn(UDim2.new(1,-58,0,8), Color3.fromRGB(39,201,63),  "□")
-local closeB  = makeTitleBtn(UDim2.new(1,-30,0,8), Color3.fromRGB(255,95,86),  "✕")
+local minBtn = makeTitleBtn(UDim2.new(1,-86,0,8), Color3.fromRGB(255,189,68), "─")
+local maxBtn = makeTitleBtn(UDim2.new(1,-58,0,8), Color3.fromRGB(39,201,63),  "□")
+local closeB = makeTitleBtn(UDim2.new(1,-30,0,8), Color3.fromRGB(255,95,86),  "✕")
 
 local sidebar = Instance.new("Frame"); sidebar.Size = UDim2.new(0,80,1,-40); sidebar.Position = UDim2.new(0,0,0,40); sidebar.BackgroundColor3 = Color3.fromRGB(22,22,35); sidebar.BorderSizePixel = 0; sidebar.Parent = win
 local sideLayout = Instance.new("UIListLayout"); sideLayout.Padding = UDim.new(0,4); sideLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center; sideLayout.Parent = sidebar
@@ -82,19 +81,16 @@ local divider = Instance.new("Frame"); divider.Size = UDim2.new(0,2,1,-40); divi
 
 local tabPages = {}
 local tabBtns = {}
-local currentTab = nil
 
 local function newTab(icon2, name)
     local btn = Instance.new("TextButton"); btn.Size = UDim2.new(0,68,0,64); btn.BackgroundColor3 = Color3.fromRGB(30,30,48); btn.Text = ""; btn.BorderSizePixel = 0; btn.Parent = sidebar
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0,8)
     local ico = Instance.new("TextLabel"); ico.Size = UDim2.new(1,0,0,32); ico.Position = UDim2.new(0,0,0,6); ico.Text = icon2; ico.TextScaled = true; ico.BackgroundTransparency = 1; ico.TextColor3 = Color3.fromRGB(160,160,200); ico.Font = Enum.Font.GothamBold; ico.Parent = btn
     local lbl = Instance.new("TextLabel"); lbl.Size = UDim2.new(1,0,0,20); lbl.Position = UDim2.new(0,0,0,38); lbl.Text = name; lbl.TextSize = 10; lbl.BackgroundTransparency = 1; lbl.TextColor3 = Color3.fromRGB(140,140,180); lbl.Font = Enum.Font.Gotham; lbl.Parent = btn
-
     local page = Instance.new("ScrollingFrame"); page.Size = UDim2.new(1,0,1,0); page.BackgroundTransparency = 1; page.BorderSizePixel = 0; page.ScrollBarThickness = 3; page.CanvasSize = UDim2.new(0,0,0,0); page.Visible = false; page.Parent = contentArea
     local pl = Instance.new("UIListLayout"); pl.Padding = UDim.new(0,8); pl.Parent = page
     local pp2 = Instance.new("UIPadding"); pp2.PaddingTop = UDim.new(0,8); pp2.PaddingLeft = UDim.new(0,4); pp2.PaddingRight = UDim.new(0,8); pp2.Parent = page
     pl.Changed:Connect(function() page.CanvasSize = UDim2.new(0,0,0,pl.AbsoluteContentSize.Y+16) end)
-
     tabPages[name] = page; tabBtns[name] = {btn=btn, ico=ico, lbl=lbl}
     btn.MouseButton1Click:Connect(function()
         for n, p in next, tabPages do
@@ -107,7 +103,6 @@ local function newTab(icon2, name)
         btn.BackgroundColor3 = Color3.fromRGB(40,40,65)
         ico.TextColor3 = Color3.fromRGB(100,180,255)
         lbl.TextColor3 = Color3.fromRGB(100,180,255)
-        currentTab = name
     end)
     return page
 end
@@ -138,51 +133,64 @@ end
 
 -- ========== TAB: Feed ==========
 local feedPage = newTab("🍖", "Feed")
-addLabel(feedPage, "Feed Pet (หยุดอาหารนั้นเมื่อติด Mutation)")
+addLabel(feedPage, "Feed Pet (ข้ามเมื่อติด Mutation แล้ว)")
 local feedStatus = addStatus(feedPage, "พร้อมใช้งาน")
 addBtn(feedPage, "▶  เริ่มให้อาหาร", Color3.fromRGB(0,150,80), function()
     if running then return end
-    running = true; feedStatus.Text = "⏳ กำลังทำงาน..."
+    running = true
+    feedStatus.Text = "⏳ กำลังทำงาน..."
     local myPets = getMyPets()
     if #myPets == 0 then running=false; feedStatus.Text="ไม่พบ pet"; return end
     task.spawn(function()
         local total = 0
-        for _, v2 in next, Foods do
+        for _, food in next, Foods do
             if not running then break end
-
-            -- วนให้อาหารชนิดนี้จนกว่า pet ทุกตัวที่ยังไม่ติด mutation นี้จะหมด
+            -- วนให้อาหารชนิดนี้จนกว่า pet ทุกตัวจะติด mutation ของมันหมด
             local keepGoing = true
             while keepGoing and running do
-                keepGoing = false -- สมมติว่าหยุดก่อน ถ้ายังมี pet ที่ต้องให้จะเปิดใหม่
-                for _, v1 in next, myPets do
+                keepGoing = false
+                for _, pet in next, myPets do
                     if not running then break end
-                    local mutation = v1:GetAttribute("Mutation") or ""
-                    local blockedFood = MutationFoodMap[mutation]
-
-                    -- ถ้า pet นี้ยังไม่ติด mutation ของอาหารนี้ → ให้ต่อ
-                    if blockedFood ~= v2 then
-                        keepGoing = true
-                        pcall(function()
-                            ReplicatedStorage.Packages._Index["sleitnick_knit@1.7.0"].knit.Services.FoodService.RF.FeedPet:InvokeServer(v2, v1.Name, 0/0)
-                        end)
-                        total += 1
-                        feedStatus.Text = v2 .. " → " .. getDisplayName(v1)
-                        task.wait()
-                    else
-                        feedStatus.Text = "⏭ ข้าม " .. getDisplayName(v1) .. " (ติด " .. mutation .. " แล้ว)"
-                        task.wait()
+                    local mutation = pet:GetAttribute("Mutation") or ""
+                    local blocked = MutationFoodMap[mutation]
+                    if blocked == food then
+                        -- ติดแล้ว ข้ามตัวนี้
+                        continue
                     end
+                    -- ยังไม่ติด → ให้ต่อ และยังต้องวนอีก
+                    keepGoing = true
+                    pcall(function()
+                        ReplicatedStorage.Packages._Index["sleitnick_knit@1.7.0"].knit.Services.FoodService.RF.FeedPet:InvokeServer(food, pet.Name, 0/0)
+                    end)
+                    total += 1
+                    feedStatus.Text = food .. " → " .. getDisplayName(pet)
+                    task.wait()
                 end
             end
-
-            feedStatus.Text = "✅ " .. v2 .. " ครบทุกตัวแล้ว → ไปอาหารถัดไป"
-            task.wait(0.2)
+            feedStatus.Text = "✅ " .. food .. " ครบ → ถัดไป"
+            task.wait(0.1)
         end
-        feedStatus.Text = "✅ เสร็จ! (" .. total .. " ครั้ง)"; running = false
+        feedStatus.Text = "✅ เสร็จทั้งหมด! (" .. total .. " ครั้ง)"
+        running = false
     end)
 end)
 addBtn(feedPage, "⏹  หยุดให้อาหาร", Color3.fromRGB(160,40,40), function()
     running=false; feedStatus.Text="⏹ หยุดแล้ว"
+end)
+
+-- ========== TAB: Lock ==========
+local lockPage = newTab("🔒", "Lock")
+addLabel(lockPage, "Lock Progress")
+local lockStatus = addStatus(lockPage, "ปิดอยู่")
+addBtn(lockPage, "🔒  Lock 75% (เปิด)", Color3.fromRGB(60,60,180), function()
+    if lockRunning then return end
+    lockRunning=true; lockStatus.Text="🔒 กำลัง Lock 75%"
+    task.spawn(function()
+        while lockRunning do pcall(function() UpdateProgress:FireServer(75) end); task.wait(1) end
+    end)
+end)
+addBtn(lockPage, "🔓  หยุด Lock", Color3.fromRGB(100,60,20), function()
+    lockRunning=false; lockStatus.Text="ปิดอยู่"
 end)
 
 -- ========== TAB: Catch ==========
@@ -244,4 +252,4 @@ closeB.MouseButton1Click:Connect(function()
     closed=true; running=false; lockRunning=false; catchRunning=false; gui:Destroy()
 end)
 
-tabBtns["Feed"].btn:MouseButton1Click()
+tabBtns["Feed"].btn:MouseButton1Click()----1
