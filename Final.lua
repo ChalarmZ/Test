@@ -252,4 +252,4 @@ closeB.MouseButton1Click:Connect(function()
     closed=true; running=false; lockRunning=false; catchRunning=false; gui:Destroy()
 end)
 
-tabBtns["Feed"].btn:MouseButton1Click()----1
+tabBtns["Feed"].btn:MouseButton1Click()----2
