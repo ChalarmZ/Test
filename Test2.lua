@@ -138,7 +138,7 @@ end
 
 -- ========== TAB: Feed ==========
 local feedPage = newTab("🍖", "Feed")
-addLabel(feedPage, "Feed Pet (ข้าม Mutation ที่ติดแล้ว)")
+addLabel(feedPage, "Feed Pet (หยุดอาหารนั้นเมื่อติด Mutation)")
 local feedStatus = addStatus(feedPage, "พร้อมใช้งาน")
 addBtn(feedPage, "▶  เริ่มให้อาหาร", Color3.fromRGB(0,150,80), function()
     if running then return end
@@ -147,49 +147,42 @@ addBtn(feedPage, "▶  เริ่มให้อาหาร", Color3.fromRGB(
     if #myPets == 0 then running=false; feedStatus.Text="ไม่พบ pet"; return end
     task.spawn(function()
         local total = 0
-        local skipped = 0
         for _, v2 in next, Foods do
             if not running then break end
-            for i = 1, 30 do
-                if not running then break end
+
+            -- วนให้อาหารชนิดนี้จนกว่า pet ทุกตัวที่ยังไม่ติด mutation นี้จะหมด
+            local keepGoing = true
+            while keepGoing and running do
+                keepGoing = false -- สมมติว่าหยุดก่อน ถ้ายังมี pet ที่ต้องให้จะเปิดใหม่
                 for _, v1 in next, myPets do
                     if not running then break end
-
-                    -- เช็ค mutation ถ้าตรงกับอาหารนี้ให้ข้ามเลย
                     local mutation = v1:GetAttribute("Mutation") or ""
                     local blockedFood = MutationFoodMap[mutation]
-                    if blockedFood == v2 then
-                        skipped += 1
-                        feedStatus.Text = "⏭ ข้าม "..v2.." → "..getDisplayName(v1)
-                        task.wait()
-                        continue
-                    end
 
-                    pcall(function() ReplicatedStorage.Packages._Index["sleitnick_knit@1.7.0"].knit.Services.FoodService.RF.FeedPet:InvokeServer(v2, v1.Name, 0/0) end)
-                    total+=1; feedStatus.Text=v2.." "..i.."/50 → "..getDisplayName(v1); task.wait()
+                    -- ถ้า pet นี้ยังไม่ติด mutation ของอาหารนี้ → ให้ต่อ
+                    if blockedFood ~= v2 then
+                        keepGoing = true
+                        pcall(function()
+                            ReplicatedStorage.Packages._Index["sleitnick_knit@1.7.0"].knit.Services.FoodService.RF.FeedPet:InvokeServer(v2, v1.Name, 0/0)
+                        end)
+                        total += 1
+                        feedStatus.Text = v2 .. " → " .. getDisplayName(v1)
+                        task.wait()
+                    else
+                        feedStatus.Text = "⏭ ข้าม " .. getDisplayName(v1) .. " (ติด " .. mutation .. " แล้ว)"
+                        task.wait()
+                    end
                 end
             end
+
+            feedStatus.Text = "✅ " .. v2 .. " ครบทุกตัวแล้ว → ไปอาหารถัดไป"
+            task.wait(0.2)
         end
-        feedStatus.Text="✅ เสร็จ! ให้ "..total.." | ข้าม "..skipped.." ครั้ง"; running=false
+        feedStatus.Text = "✅ เสร็จ! (" .. total .. " ครั้ง)"; running = false
     end)
 end)
 addBtn(feedPage, "⏹  หยุดให้อาหาร", Color3.fromRGB(160,40,40), function()
     running=false; feedStatus.Text="⏹ หยุดแล้ว"
-end)
-
--- ========== TAB: Lock ==========
-local lockPage = newTab("🔒", "Lock")
-addLabel(lockPage, "Lock Progress")
-local lockStatus = addStatus(lockPage, "ปิดอยู่")
-addBtn(lockPage, "🔒  Lock 75% (เปิด)", Color3.fromRGB(60,60,180), function()
-    if lockRunning then return end
-    lockRunning=true; lockStatus.Text="🔒 กำลัง Lock 75%"
-    task.spawn(function()
-        while lockRunning do pcall(function() UpdateProgress:FireServer(75) end); task.wait(1) end
-    end)
-end)
-addBtn(lockPage, "🔓  หยุด Lock", Color3.fromRGB(100,60,20), function()
-    lockRunning=false; lockStatus.Text="ปิดอยู่"
 end)
 
 -- ========== TAB: Catch ==========
