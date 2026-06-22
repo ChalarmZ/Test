@@ -149,7 +149,7 @@ addBtn(feedPage, "▶  เริ่มให้อาหาร", Color3.fromRGB(
         local skipped = 0
         for _, v2 in next, Foods do
             if not running then break end
-            for i = 1, 30 do
+            for i = 1, 20 do
                 if not running then break end
                 for _, v1 in next, myPets do
                     if not running then break end
