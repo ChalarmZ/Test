@@ -141,7 +141,7 @@ addBtn(feedPage, "▶  เริ่มให้อาหาร", Color3.fromRGB(
                 for _, v1 in next, myPets do
                     if not running then break end
                     pcall(function() ReplicatedStorage.Packages._Index["sleitnick_knit@1.7.0"].knit.Services.FoodService.RF.FeedPet:InvokeServer(v2, v1.Name, 0/0) end)
-                    total+=1; feedStatus.Text=v2.." "..i.."/50 → "..getDisplayName(v1); task.wait()
+                    total+=1; feedStatus.Text=v2.." "..i.."/30 → "..getDisplayName(v1); task.wait()
                 end
             end
         end
