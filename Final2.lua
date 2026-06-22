@@ -5,26 +5,25 @@ local LocalPlayer = Players.LocalPlayer
 local Foods = {"Banana","Cave Mushroom","Cosmic Fruit","Volcanic Fruit","Heart Chocolate","Bloodmoon Grape","Tuna Fish","Dog Treat","Taco","Alien Fruit","Chocolate Egg","Radioactive Strawberry","Cotton Candy","Waffle","Star","Bag Of Worms","Pepper","Abyss Crystal","Rocky Cookie","Mango"}
 
 local MutationFoodMap = {
-    Dusty          = "Banana",
-    Cavern         = "Cave Mushroom",
-    Cosmic         = "Cosmic Fruit",
-    Volcanic       = "Volcanic Fruit",
-    Lovestruck     = "Heart Chocolate",
-    Bloodmoon      = "Bloodmoon Grape",
-    Clawed         = "Tuna Fish",
-    Fluffy         = "Dog Treat",
-    Taco           = "Taco",
-    Alien          = "Alien Fruit",
-    Easter         = "Chocolate Egg",
-    Abducted       = "Radioactive Strawberry",
-    Candy          = "Cotton Candy",
+    Dusty        = "Banana",
+    Cavern       = "Cave Mushroom",
+    Cosmic       = "Cosmic Fruit",
+    Volcanic     = "Volcanic Fruit",
+    Lovestruck   = "Heart Chocolate",
+    Bloodmoon    = "Bloodmoon Grape",
+    Clawed       = "Tuna Fish",
+    Fluffy       = "Dog Treat",
+    Taco         = "Taco",
+    Alien        = "Alien Fruit",
+    Easter       = "Chocolate Egg",
+    Abducted     = "Radioactive Strawberry",
+    Candy        = "Cotton Candy",
     ["Steam Punk"] = "Waffle",
-    Stary          = "Star",
-    Tidal          = "Bag Of Worms",
-    Spiced         = "Pepper",
-    Void           = "Abyss Crystal",
-    Rocky          = "Rocky Cookie",
-    Tropical       = "Mango",
+    Stary        = "Star",
+    Tidal        = "Bag Of Worms",
+    Spiced       = "Pepper",
+    Void         = "Abyss Crystal",
+    Rocky        = "Rocky Cookie",
 }
 
 local Remotes = ReplicatedStorage:WaitForChild("Remotes")
@@ -49,6 +48,7 @@ local function getMyPets()
     return t
 end
 
+-- ========== GUI ==========
 if LocalPlayer.PlayerGui:FindFirstChild("ChalarmGui") then LocalPlayer.PlayerGui.ChalarmGui:Destroy() end
 local gui = Instance.new("ScreenGui"); gui.ResetOnSpawn = false; gui.Name = "ChalarmGui"; gui.Parent = LocalPlayer.PlayerGui
 
@@ -68,9 +68,9 @@ local function makeTitleBtn(pos, color, symbol)
     local b = Instance.new("TextButton"); b.Size = UDim2.new(0,24,0,24); b.Position = pos; b.Text = symbol; b.TextColor3 = Color3.fromRGB(255,255,255); b.BackgroundColor3 = color; b.Font = Enum.Font.GothamBold; b.TextSize = 12; b.BorderSizePixel = 0; b.Parent = titlebar
     Instance.new("UICorner", b).CornerRadius = UDim.new(1,0); return b
 end
-local minBtn = makeTitleBtn(UDim2.new(1,-86,0,8), Color3.fromRGB(255,189,68), "─")
-local maxBtn = makeTitleBtn(UDim2.new(1,-58,0,8), Color3.fromRGB(39,201,63),  "□")
-local closeB = makeTitleBtn(UDim2.new(1,-30,0,8), Color3.fromRGB(255,95,86),  "✕")
+local minBtn  = makeTitleBtn(UDim2.new(1,-86,0,8), Color3.fromRGB(255,189,68), "─")
+local maxBtn  = makeTitleBtn(UDim2.new(1,-58,0,8), Color3.fromRGB(39,201,63),  "□")
+local closeB  = makeTitleBtn(UDim2.new(1,-30,0,8), Color3.fromRGB(255,95,86),  "✕")
 
 local sidebar = Instance.new("Frame"); sidebar.Size = UDim2.new(0,80,1,-40); sidebar.Position = UDim2.new(0,0,0,40); sidebar.BackgroundColor3 = Color3.fromRGB(22,22,35); sidebar.BorderSizePixel = 0; sidebar.Parent = win
 local sideLayout = Instance.new("UIListLayout"); sideLayout.Padding = UDim.new(0,4); sideLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center; sideLayout.Parent = sidebar
@@ -81,16 +81,19 @@ local divider = Instance.new("Frame"); divider.Size = UDim2.new(0,2,1,-40); divi
 
 local tabPages = {}
 local tabBtns = {}
+local currentTab = nil
 
 local function newTab(icon2, name)
     local btn = Instance.new("TextButton"); btn.Size = UDim2.new(0,68,0,64); btn.BackgroundColor3 = Color3.fromRGB(30,30,48); btn.Text = ""; btn.BorderSizePixel = 0; btn.Parent = sidebar
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0,8)
     local ico = Instance.new("TextLabel"); ico.Size = UDim2.new(1,0,0,32); ico.Position = UDim2.new(0,0,0,6); ico.Text = icon2; ico.TextScaled = true; ico.BackgroundTransparency = 1; ico.TextColor3 = Color3.fromRGB(160,160,200); ico.Font = Enum.Font.GothamBold; ico.Parent = btn
     local lbl = Instance.new("TextLabel"); lbl.Size = UDim2.new(1,0,0,20); lbl.Position = UDim2.new(0,0,0,38); lbl.Text = name; lbl.TextSize = 10; lbl.BackgroundTransparency = 1; lbl.TextColor3 = Color3.fromRGB(140,140,180); lbl.Font = Enum.Font.Gotham; lbl.Parent = btn
+
     local page = Instance.new("ScrollingFrame"); page.Size = UDim2.new(1,0,1,0); page.BackgroundTransparency = 1; page.BorderSizePixel = 0; page.ScrollBarThickness = 3; page.CanvasSize = UDim2.new(0,0,0,0); page.Visible = false; page.Parent = contentArea
     local pl = Instance.new("UIListLayout"); pl.Padding = UDim.new(0,8); pl.Parent = page
     local pp2 = Instance.new("UIPadding"); pp2.PaddingTop = UDim.new(0,8); pp2.PaddingLeft = UDim.new(0,4); pp2.PaddingRight = UDim.new(0,8); pp2.Parent = page
     pl.Changed:Connect(function() page.CanvasSize = UDim2.new(0,0,0,pl.AbsoluteContentSize.Y+16) end)
+
     tabPages[name] = page; tabBtns[name] = {btn=btn, ico=ico, lbl=lbl}
     btn.MouseButton1Click:Connect(function()
         for n, p in next, tabPages do
@@ -103,6 +106,7 @@ local function newTab(icon2, name)
         btn.BackgroundColor3 = Color3.fromRGB(40,40,65)
         ico.TextColor3 = Color3.fromRGB(100,180,255)
         lbl.TextColor3 = Color3.fromRGB(100,180,255)
+        currentTab = name
     end)
     return page
 end
@@ -133,44 +137,39 @@ end
 
 -- ========== TAB: Feed ==========
 local feedPage = newTab("🍖", "Feed")
-addLabel(feedPage, "Feed Pet (ข้ามเมื่อติด Mutation แล้ว)")
+addLabel(feedPage, "Feed Pet (ข้าม Mutation ที่ติดแล้ว)")
 local feedStatus = addStatus(feedPage, "พร้อมใช้งาน")
 addBtn(feedPage, "▶  เริ่มให้อาหาร", Color3.fromRGB(0,150,80), function()
     if running then return end
-    running = true
-    feedStatus.Text = "⏳ กำลังทำงาน..."
+    running = true; feedStatus.Text = "⏳ กำลังทำงาน..."
     local myPets = getMyPets()
     if #myPets == 0 then running=false; feedStatus.Text="ไม่พบ pet"; return end
     task.spawn(function()
         local total = 0
-        for _, food in next, Foods do
+        local skipped = 0
+        for _, v2 in next, Foods do
             if not running then break end
-            local keepGoing = true
-            while keepGoing and running do
-                keepGoing = false
-                for _, pet in next, myPets do
+            for i = 1, 30 do
+                if not running then break end
+                for _, v1 in next, myPets do
                     if not running then break end
-                    task.wait(0.05)
-                    local mutation = pet:GetAttribute("Mutation") or ""
-                    local blocked = MutationFoodMap[mutation]
-                    if blocked == food then
-                        feedStatus.Text = "⏭ " .. getDisplayName(pet) .. " ติด " .. mutation .. " แล้ว"
+
+                    -- เช็ค mutation ถ้าตรงกับอาหารนี้ให้ข้ามเลย
+                    local mutation = v1:GetAttribute("Mutation") or ""
+                    local blockedFood = MutationFoodMap[mutation]
+                    if blockedFood == v2 then
+                        skipped += 1
+                        feedStatus.Text = "⏭ ข้าม "..v2.." → "..getDisplayName(v1)
+                        task.wait()
                         continue
                     end
-                    keepGoing = true
-                    pcall(function()
-                        ReplicatedStorage.Packages._Index["sleitnick_knit@1.7.0"].knit.Services.FoodService.RF.FeedPet:InvokeServer(food, pet.Name, 0/0)
-                    end)
-                    total += 1
-                    feedStatus.Text = food .. " → " .. getDisplayName(pet)
-                    task.wait(0.5) -- รอให้ server อัพเดต attribute กลับมา
+
+                    pcall(function() ReplicatedStorage.Packages._Index["sleitnick_knit@1.7.0"].knit.Services.FoodService.RF.FeedPet:InvokeServer(v2, v1.Name, 0/0) end)
+                    total+=1; feedStatus.Text=v2.." "..i.."/30 → "..getDisplayName(v1); task.wait()
                 end
             end
-            feedStatus.Text = "✅ " .. food .. " ครบ → ถัดไป"
-            task.wait(0.1)
         end
-        feedStatus.Text = "✅ เสร็จทั้งหมด! (" .. total .. " ครั้ง)"
-        running = false
+        feedStatus.Text="✅ เสร็จ! ให้ "..total.." | ข้าม "..skipped.." ครั้ง"; running=false
     end)
 end)
 addBtn(feedPage, "⏹  หยุดให้อาหาร", Color3.fromRGB(160,40,40), function()
