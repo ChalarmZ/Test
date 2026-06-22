@@ -135,3 +135,20 @@ end)
 CatchSection:NewButton("⏹ หยุด Auto Catch", "หยุดจับ pet", function()
     catchRunning = false
 end)
+
+local MainTab = Window:NewTab("≡ Menu")
+local MainSection = MainTab:NewSection("Controls")
+
+MainSection:NewButton("🔽 ซ่อน/แสดง UI", "ซ่อนหรือแสดง window", function()
+    local gui = LocalPlayer.PlayerGui:FindFirstChild("Kavo UI") 
+        or LocalPlayer.PlayerGui:FindFirstChild("ScreenGui")
+    if gui then
+        -- หา main frame
+        for _, v in next, gui:GetDescendants() do
+            if v:IsA("Frame") and v.Size.X.Offset > 200 then
+                v.Visible = not v.Visible
+                break
+            end
+        end
+    end
+end)
