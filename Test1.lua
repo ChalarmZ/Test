@@ -4,214 +4,227 @@ local LocalPlayer = Players.LocalPlayer
 
 local Foods = {"Banana","Cave Mushroom","Cosmic Fruit","Volcanic Fruit","Heart Chocolate","Bloodmoon Grape","Tuna Fish","Dog Treat","Taco","Alien Fruit","Chocolate Egg","Radioactive Strawberry","Cotton Candy","Waffle","Star","Bag Of Worms","Pepper","Abyss Crystal","Steak","Rocky Cookie"}
 
-if LocalPlayer.PlayerGui:FindFirstChild("FoodGui") then LocalPlayer.PlayerGui.FoodGui:Destroy() end
-
-local gui = Instance.new("ScreenGui"); gui.ResetOnSpawn = false; gui.Name = "FoodGui"; gui.Parent = LocalPlayer.PlayerGui
-
-local frame = Instance.new("Frame"); frame.Size = UDim2.new(0,260,0,540); frame.Position = UDim2.new(0.5,-130,0.5,-270); frame.BackgroundColor3 = Color3.fromRGB(25,25,25); frame.BorderSizePixel = 0; frame.Active = true; frame.Draggable = true; frame.Parent = gui
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0,12)
-
-local function makeLabel(text, pos, color)
-    local l = Instance.new("TextLabel"); l.Size = UDim2.new(1,-10,0,22); l.Position = pos; l.Text = text; l.TextColor3 = color or Color3.fromRGB(180,180,180); l.BackgroundTransparency = 1; l.Font = Enum.Font.Gotham; l.TextScaled = true; l.Parent = frame; return l
-end
-local function makeBtn(text, pos, size, color)
-    local b = Instance.new("TextButton"); b.Size = size; b.Position = pos; b.Text = text; b.TextColor3 = Color3.fromRGB(255,255,255); b.BackgroundColor3 = color; b.Font = Enum.Font.GothamBold; b.TextScaled = true; b.BorderSizePixel = 0; b.Parent = frame
-    Instance.new("UICorner", b).CornerRadius = UDim.new(0,8); return b
-end
-
-local titleL = Instance.new("TextLabel"); titleL.Size = UDim2.new(1,-44,0,38); titleL.BackgroundColor3 = Color3.fromRGB(40,40,40); titleL.Text = "🍖  Pet Food Bot"; titleL.TextColor3 = Color3.fromRGB(255,255,255); titleL.Font = Enum.Font.GothamBold; titleL.TextScaled = true; titleL.BorderSizePixel = 0; titleL.Parent = frame
-Instance.new("UICorner", titleL).CornerRadius = UDim.new(0,12)
-
-local closeBtn  = makeBtn("✖",             UDim2.new(1,-40,0,1),    UDim2.new(0,36,0,36),  Color3.fromRGB(200,50,50))
-local selAllBtn = makeBtn("✅ เลือกทั้งหมด", UDim2.new(0,8,0,44),     UDim2.new(0.48,0,0,28),Color3.fromRGB(50,130,50))
-local deselBtn  = makeBtn("❌ ยกเลิกทั้งหมด",UDim2.new(0.52,-8,0,44), UDim2.new(0.48,0,0,28),Color3.fromRGB(130,50,50))
-
-local scroll = Instance.new("ScrollingFrame"); scroll.Size = UDim2.new(1,-16,0,200); scroll.Position = UDim2.new(0,8,0,78); scroll.BackgroundColor3 = Color3.fromRGB(35,35,35); scroll.BorderSizePixel = 0; scroll.ScrollBarThickness = 4; scroll.CanvasSize = UDim2.new(0,0,0,0); scroll.Parent = frame
-Instance.new("UICorner", scroll).CornerRadius = UDim.new(0,8)
-local ll = Instance.new("UIListLayout"); ll.Padding = UDim.new(0,4); ll.Parent = scroll
-local pp = Instance.new("UIPadding"); pp.PaddingTop = UDim.new(0,4); pp.PaddingLeft = UDim.new(0,4); pp.PaddingRight = UDim.new(0,4); pp.Parent = scroll
-
-local statusL   = makeLabel("พร้อมใช้งาน",             UDim2.new(0,5,0,284), Color3.fromRGB(0,255,128))
-local foodBtn   = makeBtn("▶  เริ่มให้อาหาร",           UDim2.new(0,8,0,312),  UDim2.new(1,-16,0,42), Color3.fromRGB(0,180,80))
-local progLabel = makeLabel("🔒 Lock Progress: ปิดอยู่", UDim2.new(0,5,0,362))
-local lockBtn   = makeBtn("🔒  Lock Progress 75%",      UDim2.new(0,8,0,388),  UDim2.new(1,-16,0,42), Color3.fromRGB(80,80,180))
-
-makeLabel("🎯 Catch Rarity:", UDim2.new(0,5,0,436), Color3.fromRGB(200,200,200))
-
-local Rarities = {"Common", "Divine"}
-local rarityColors = {Common = Color3.fromRGB(150,150,150), Divine = Color3.fromRGB(80,220,220)}
-local selectedRarities = {Common = false, Divine = false}
-local rarityBtns = {}
-
-local rarityRow = Instance.new("Frame"); rarityRow.Size = UDim2.new(1,-16,0,44); rarityRow.Position = UDim2.new(0,8,0,458); rarityRow.BackgroundTransparency = 1; rarityRow.Parent = frame
-local rll = Instance.new("UIListLayout"); rll.FillDirection = Enum.FillDirection.Horizontal; rll.Padding = UDim.new(0,6); rll.Parent = rarityRow
-
-for _, rarity in next, Rarities do
-    local rb = Instance.new("TextButton"); rb.Size = UDim2.new(0,116,0,44); rb.BackgroundColor3 = Color3.fromRGB(50,50,50); rb.Text = rarity; rb.TextColor3 = rarityColors[rarity]; rb.Font = Enum.Font.GothamBold; rb.TextScaled = true; rb.BorderSizePixel = 0; rb.Parent = rarityRow
-    Instance.new("UICorner", rb).CornerRadius = UDim.new(0,8)
-    rarityBtns[rarity] = rb
-    rb.MouseButton1Click:Connect(function()
-        selectedRarities[rarity] = not selectedRarities[rarity]
-        rb.BackgroundColor3 = selectedRarities[rarity] and rarityColors[rarity] or Color3.fromRGB(50,50,50)
-        rb.TextColor3 = selectedRarities[rarity] and Color3.fromRGB(255,255,255) or rarityColors[rarity]
-    end)
-end
-
-local catchLabel = makeLabel("🐾 Auto Catch: ปิดอยู่", UDim2.new(0,5,0,504))
-local catchBtn   = makeBtn("🐾  Auto Catch Pet",        UDim2.new(0,8,0,492), UDim2.new(1,-16,0,42), Color3.fromRGB(180,120,0))
-
--- ========== LOGIC ==========
-local checkboxes, connections = {}, {}
-local running, closed, lockRunning, catchRunning = false, false, false, false
 local Remotes = ReplicatedStorage:WaitForChild("Remotes")
 local UpdateProgress = Remotes:WaitForChild("UpdateProgress")
 local ThrowLasso = Remotes:WaitForChild("ThrowLasso")
 local minigameRequest = Remotes:WaitForChild("minigameRequest")
 local petsFolder = workspace:WaitForChild("RoamingPets"):WaitForChild("Pets")
 
+local running, lockRunning, catchRunning, closed = false, false, false, false
+local selectedRarities = {Common = false, Divine = false}
+
 local function getDisplayName(v1)
     local n = v1:GetAttribute("Name"); return (n and n ~= "") and n or v1.Name:sub(1,8).."..."
 end
-
-local function loadPets()
-    if closed then return end
-    for _, c in next, scroll:GetChildren() do if c:IsA("TextButton") then c:Destroy() end end
-    local prev = {}; for k, d in next, checkboxes do prev[k] = d.selected end
-    checkboxes = {}; local count = 0
+local function getMyPets()
+    local t = {}
     for _, v in next, workspace.PlayerPens:GetChildren() do
         if v:GetAttribute("Owner") == LocalPlayer.Name then
-            for _, v1 in next, v.Pets:GetChildren() do
-                count += 1
-                local id = v1.Name; local dn = getDisplayName(v1); local rar = v1:GetAttribute("Rarity") or ""
-                local sel = prev[id]; if sel == nil then sel = true end
-                local cb = Instance.new("TextButton"); cb.Size = UDim2.new(1,0,0,30); cb.BackgroundColor3 = sel and Color3.fromRGB(50,50,50) or Color3.fromRGB(35,35,35); cb.Text = (sel and "✅  " or "⬜  ")..dn..(rar~="" and "  ["..rar.."]" or ""); cb.TextColor3 = Color3.fromRGB(255,255,255); cb.Font = Enum.Font.Gotham; cb.TextScaled = true; cb.BorderSizePixel = 0; cb.TextXAlignment = Enum.TextXAlignment.Left; cb.Parent = scroll
-                Instance.new("UICorner", cb).CornerRadius = UDim.new(0,6)
-                local p = Instance.new("UIPadding"); p.PaddingLeft = UDim.new(0,8); p.Parent = cb
-                checkboxes[id] = {btn=cb, selected=sel, obj=v1}
-                cb.MouseButton1Click:Connect(function()
-                    local d = checkboxes[id]; if not d then return end
-                    d.selected = not d.selected
-                    cb.Text = (d.selected and "✅  " or "⬜  ")..dn..(rar~="" and "  ["..rar.."]" or "")
-                    cb.BackgroundColor3 = d.selected and Color3.fromRGB(50,50,50) or Color3.fromRGB(35,35,35)
-                end)
-            end
+            for _, v1 in next, v.Pets:GetChildren() do table.insert(t, v1) end
         end
     end
-    scroll.CanvasSize = UDim2.new(0,0,0,count*34+8)
-    if not running then statusL.Text = "พบ "..count.." pets" end
+    return t
 end
 
-local function setupAutoRefresh()
-    for _, c in next, connections do c:Disconnect() end; connections = {}
-    for _, v in next, workspace.PlayerPens:GetChildren() do
-        if v:GetAttribute("Owner") == LocalPlayer.Name then
-            table.insert(connections, v.Pets.ChildAdded:Connect(function() task.wait(0.5); loadPets() end))
-            table.insert(connections, v.Pets.ChildRemoved:Connect(function() task.wait(0.1); loadPets() end))
+-- ========== GUI ==========
+if LocalPlayer.PlayerGui:FindFirstChild("ChalarmGui") then LocalPlayer.PlayerGui.ChalarmGui:Destroy() end
+local gui = Instance.new("ScreenGui"); gui.ResetOnSpawn = false; gui.Name = "ChalarmGui"; gui.Parent = LocalPlayer.PlayerGui
+
+-- main window
+local win = Instance.new("Frame"); win.Size = UDim2.new(0,320,0,480); win.Position = UDim2.new(0.5,-160,0.5,-240); win.BackgroundColor3 = Color3.fromRGB(18,18,28); win.BorderSizePixel = 0; win.Active = true; win.Draggable = true; win.Parent = gui
+Instance.new("UICorner", win).CornerRadius = UDim.new(0,10)
+-- shadow
+local shadow = Instance.new("ImageLabel"); shadow.Size = UDim2.new(1,30,1,30); shadow.Position = UDim2.new(0,-15,0,-15); shadow.BackgroundTransparency = 1; shadow.Image = "rbxassetid://5554236805"; shadow.ImageColor3 = Color3.fromRGB(0,0,0); shadow.ImageTransparency = 0.5; shadow.ScaleType = Enum.ScaleType.Slice; shadow.SliceCenter = Rect.new(23,23,277,277); shadow.ZIndex = 0; shadow.Parent = win
+
+-- titlebar
+local titlebar = Instance.new("Frame"); titlebar.Size = UDim2.new(1,0,0,40); titlebar.BackgroundColor3 = Color3.fromRGB(25,25,40); titlebar.BorderSizePixel = 0; titlebar.Parent = win
+Instance.new("UICorner", titlebar).CornerRadius = UDim.new(0,10)
+-- fix bottom corners
+local titleFix = Instance.new("Frame"); titleFix.Size = UDim2.new(1,0,0,10); titleFix.Position = UDim2.new(0,0,1,-10); titleFix.BackgroundColor3 = Color3.fromRGB(25,25,40); titleFix.BorderSizePixel = 0; titleFix.Parent = titlebar
+
+-- icon + title
+local icon = Instance.new("TextLabel"); icon.Size = UDim2.new(0,30,0,30); icon.Position = UDim2.new(0,8,0,5); icon.Text = "⚡"; icon.TextScaled = true; icon.BackgroundTransparency = 1; icon.TextColor3 = Color3.fromRGB(100,180,255); icon.Font = Enum.Font.GothamBold; icon.Parent = titlebar
+local titleTxt = Instance.new("TextLabel"); titleTxt.Size = UDim2.new(1,-120,1,0); titleTxt.Position = UDim2.new(0,42,0,0); titleTxt.Text = "ChalarmZ"; titleTxt.TextColor3 = Color3.fromRGB(255,255,255); titleTxt.Font = Enum.Font.GothamBold; titleTxt.TextScaled = true; titleTxt.BackgroundTransparency = 1; titleTxt.TextXAlignment = Enum.TextXAlignment.Left; titleTxt.Parent = titlebar
+
+-- window buttons (minimize, maximize, close)
+local function makeTitleBtn(pos, color, symbol)
+    local b = Instance.new("TextButton"); b.Size = UDim2.new(0,24,0,24); b.Position = pos; b.Text = symbol; b.TextColor3 = Color3.fromRGB(255,255,255); b.BackgroundColor3 = color; b.Font = Enum.Font.GothamBold; b.TextSize = 12; b.BorderSizePixel = 0; b.Parent = titlebar
+    Instance.new("UICorner", b).CornerRadius = UDim.new(1,0); return b
+end
+local minBtn  = makeTitleBtn(UDim2.new(1,-86,0,8),  Color3.fromRGB(255,189,68),  "─")
+local maxBtn  = makeTitleBtn(UDim2.new(1,-58,0,8),  Color3.fromRGB(39,201,63),   "□")
+local closeB  = makeTitleBtn(UDim2.new(1,-30,0,8),  Color3.fromRGB(255,95,86),   "✕")
+
+-- sidebar tabs
+local sidebar = Instance.new("Frame"); sidebar.Size = UDim2.new(0,80,1,-40); sidebar.Position = UDim2.new(0,0,0,40); sidebar.BackgroundColor3 = Color3.fromRGB(22,22,35); sidebar.BorderSizePixel = 0; sidebar.Parent = win
+local sideLayout = Instance.new("UIListLayout"); sideLayout.Padding = UDim.new(0,4); sideLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center; sideLayout.Parent = sidebar
+local sidePad = Instance.new("UIPadding"); sidePad.PaddingTop = UDim.new(0,8); sidePad.Parent = sidebar
+
+-- content area
+local contentArea = Instance.new("Frame"); contentArea.Size = UDim2.new(1,-88,1,-48); contentArea.Position = UDim2.new(0,84,0,44); contentArea.BackgroundTransparency = 1; contentArea.Parent = win
+
+-- divider
+local divider = Instance.new("Frame"); divider.Size = UDim2.new(0,2,1,-40); divider.Position = UDim2.new(0,80,0,40); divider.BackgroundColor3 = Color3.fromRGB(35,35,55); divider.BorderSizePixel = 0; divider.Parent = win
+
+local tabPages = {}
+local tabBtns = {}
+local currentTab = nil
+
+local function newTab(icon2, name)
+    local btn = Instance.new("TextButton"); btn.Size = UDim2.new(0,68,0,64); btn.BackgroundColor3 = Color3.fromRGB(30,30,48); btn.Text = ""; btn.BorderSizePixel = 0; btn.Parent = sidebar
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,8)
+    local ico = Instance.new("TextLabel"); ico.Size = UDim2.new(1,0,0,32); ico.Position = UDim2.new(0,0,0,6); ico.Text = icon2; ico.TextScaled = true; ico.BackgroundTransparency = 1; ico.TextColor3 = Color3.fromRGB(160,160,200); ico.Font = Enum.Font.GothamBold; ico.Parent = btn
+    local lbl = Instance.new("TextLabel"); lbl.Size = UDim2.new(1,0,0,20); lbl.Position = UDim2.new(0,0,0,38); lbl.Text = name; lbl.TextSize = 10; lbl.BackgroundTransparency = 1; lbl.TextColor3 = Color3.fromRGB(140,140,180); lbl.Font = Enum.Font.Gotham; lbl.Parent = btn
+
+    local page = Instance.new("ScrollingFrame"); page.Size = UDim2.new(1,0,1,0); page.BackgroundTransparency = 1; page.BorderSizePixel = 0; page.ScrollBarThickness = 3; page.CanvasSize = UDim2.new(0,0,0,0); page.Visible = false; page.Parent = contentArea
+    local pl = Instance.new("UIListLayout"); pl.Padding = UDim.new(0,8); pl.Parent = page
+    local pp2 = Instance.new("UIPadding"); pp2.PaddingTop = UDim.new(0,8); pp2.PaddingLeft = UDim.new(0,4); pp2.PaddingRight = UDim.new(0,8); pp2.Parent = page
+    pl.Changed:Connect(function() page.CanvasSize = UDim2.new(0,0,0,pl.AbsoluteContentSize.Y+16) end)
+
+    tabPages[name] = page; tabBtns[name] = {btn=btn, ico=ico, lbl=lbl}
+
+    btn.MouseButton1Click:Connect(function()
+        for n, p in next, tabPages do
+            p.Visible = false
+            tabBtns[n].btn.BackgroundColor3 = Color3.fromRGB(30,30,48)
+            tabBtns[n].ico.TextColor3 = Color3.fromRGB(160,160,200)
+            tabBtns[n].lbl.TextColor3 = Color3.fromRGB(140,140,180)
         end
-    end
+        page.Visible = true
+        btn.BackgroundColor3 = Color3.fromRGB(40,40,65)
+        ico.TextColor3 = Color3.fromRGB(100,180,255)
+        lbl.TextColor3 = Color3.fromRGB(100,180,255)
+        currentTab = name
+    end)
+    return page
 end
 
-loadPets(); setupAutoRefresh()
+local function addBtn(page, text, color, fn)
+    local b = Instance.new("TextButton"); b.Size = UDim2.new(1,0,0,40); b.BackgroundColor3 = color; b.Text = text; b.TextColor3 = Color3.fromRGB(255,255,255); b.Font = Enum.Font.GothamBold; b.TextScaled = true; b.BorderSizePixel = 0; b.Parent = page
+    Instance.new("UICorner", b).CornerRadius = UDim.new(0,8)
+    b.MouseButton1Click:Connect(fn); return b
+end
+local function addToggle(page, text, fn)
+    local val = false
+    local b = Instance.new("TextButton"); b.Size = UDim2.new(1,0,0,40); b.BackgroundColor3 = Color3.fromRGB(40,40,60); b.Text = "⬜  "..text; b.TextColor3 = Color3.fromRGB(200,200,200); b.Font = Enum.Font.GothamBold; b.TextScaled = true; b.BorderSizePixel = 0; b.Parent = page
+    Instance.new("UICorner", b).CornerRadius = UDim.new(0,8)
+    b.MouseButton1Click:Connect(function()
+        val = not val
+        b.Text = (val and "✅  " or "⬜  ")..text
+        b.BackgroundColor3 = val and Color3.fromRGB(0,130,70) or Color3.fromRGB(40,40,60)
+        fn(val)
+    end); return b
+end
+local function addStatus(page, text)
+    local l = Instance.new("TextLabel"); l.Size = UDim2.new(1,0,0,28); l.Text = text; l.TextColor3 = Color3.fromRGB(0,220,120); l.BackgroundColor3 = Color3.fromRGB(20,35,25); l.Font = Enum.Font.Gotham; l.TextScaled = true; l.BorderSizePixel = 0; l.Parent = page
+    Instance.new("UICorner", l).CornerRadius = UDim.new(0,6); return l
+end
+local function addLabel(page, text)
+    local l = Instance.new("TextLabel"); l.Size = UDim2.new(1,0,0,22); l.Text = text; l.TextColor3 = Color3.fromRGB(140,140,180); l.BackgroundTransparency = 1; l.Font = Enum.Font.GothamBold; l.TextSize = 12; l.BorderSizePixel = 0; l.Parent = page; return l
+end
 
-selAllBtn.MouseButton1Click:Connect(function()
-    for id, d in next, checkboxes do local dn=getDisplayName(d.obj); local r=d.obj:GetAttribute("Rarity") or ""; d.selected=true; d.btn.Text="✅  "..dn..(r~="" and "  ["..r.."]" or ""); d.btn.BackgroundColor3=Color3.fromRGB(50,50,50) end
-end)
-deselBtn.MouseButton1Click:Connect(function()
-    for id, d in next, checkboxes do local dn=getDisplayName(d.obj); local r=d.obj:GetAttribute("Rarity") or ""; d.selected=false; d.btn.Text="⬜  "..dn..(r~="" and "  ["..r.."]" or ""); d.btn.BackgroundColor3=Color3.fromRGB(35,35,35) end
-end)
-closeBtn.MouseButton1Click:Connect(function()
-    closed=true; lockRunning=false; catchRunning=false
-    for _, c in next, connections do c:Disconnect() end; gui:Destroy()
-end)
-
--- ========== FOOD (วนจนติด buff) ==========
-foodBtn.MouseButton1Click:Connect(function()
-    if running or closed then return end
-    running=true; foodBtn.Text="⏳  กำลังให้อาหาร..."; foodBtn.BackgroundColor3=Color3.fromRGB(180,100,0)
-    local totalCount = 0
-
-    for _, v2 in next, Foods do
-        if closed then break end
-        local keepFeeding = true
-        while keepFeeding and not closed do
-            local anyFed = false
-            for id, d in next, checkboxes do
-                if closed then break end
-                if d.selected then
-                    local ok, result = pcall(function()
-                        return ReplicatedStorage.Packages._Index["sleitnick_knit@1.7.0"].knit.Services.FoodService.RF.FeedPet:InvokeServer(v2, id, 0/0)
-                    end)
-                    if ok and result == true then
-                        anyFed = true
-                        totalCount += 1
-                        if not closed then statusL.Text = v2.." → "..getDisplayName(d.obj) end
-                    end
-                    task.wait(0.05)
+-- ========== TAB: Feed ==========
+local feedPage = newTab("🍖", "Feed")
+addLabel(feedPage, "Feed Pet")
+local feedStatus = addStatus(feedPage, "พร้อมใช้งาน")
+addBtn(feedPage, "▶  เริ่มให้อาหาร", Color3.fromRGB(0,150,80), function()
+    if running then return end
+    running = true; feedStatus.Text = "⏳ กำลังทำงาน..."
+    local myPets = getMyPets()
+    if #myPets == 0 then running=false; feedStatus.Text="ไม่พบ pet"; return end
+    task.spawn(function()
+        local total = 0
+        for _, v2 in next, Foods do
+            if not running then break end
+            for i = 1, 50 do
+                if not running then break end
+                for _, v1 in next, myPets do
+                    if not running then break end
+                    pcall(function() ReplicatedStorage.Packages._Index["sleitnick_knit@1.7.0"].knit.Services.FoodService.RF.FeedPet:InvokeServer(v2, v1.Name, 0/0) end)
+                    total+=1; feedStatus.Text=v2.." "..i.."/50 → "..getDisplayName(v1); task.wait()
                 end
             end
-            if not anyFed then keepFeeding = false end
         end
-        if not closed then statusL.Text = "✅ "..v2.." เต็มแล้ว ("..totalCount..")" end
-        task.wait(0.05)
-    end
-
-    if not closed then
-        statusL.Text="✅ เสร็จทั้งหมด! ("..totalCount.." ครั้ง)"
-        foodBtn.Text="▶  เริ่มให้อาหาร"; foodBtn.BackgroundColor3=Color3.fromRGB(0,180,80); running=false
-    end
+        feedStatus.Text="✅ เสร็จ! ("..total.." ครั้ง)"; running=false
+    end)
+end)
+addBtn(feedPage, "⏹  หยุดให้อาหาร", Color3.fromRGB(160,40,40), function()
+    running=false; feedStatus.Text="⏹ หยุดแล้ว"
 end)
 
-lockBtn.MouseButton1Click:Connect(function()
-    if closed then return end
-    lockRunning = not lockRunning
-    if lockRunning then
-        lockBtn.Text="🔓  หยุด Lock Progress"; lockBtn.BackgroundColor3=Color3.fromRGB(180,100,0)
-        progLabel.Text="🔒 Lock Progress: 75% ทำงาน"; progLabel.TextColor3=Color3.fromRGB(0,255,128)
-        task.spawn(function() while lockRunning and not closed do pcall(function() UpdateProgress:FireServer(75) end); task.wait(1) end end)
-    else
-        lockBtn.Text="🔒  Lock Progress 75%"; lockBtn.BackgroundColor3=Color3.fromRGB(80,80,180)
-        progLabel.Text="🔒 Lock Progress: ปิดอยู่"; progLabel.TextColor3=Color3.fromRGB(180,180,180)
-    end
+-- ========== TAB: Lock ==========
+local lockPage = newTab("🔒", "Lock")
+addLabel(lockPage, "Lock Progress")
+local lockStatus = addStatus(lockPage, "ปิดอยู่")
+addBtn(lockPage, "🔒  Lock 75% (เปิด)", Color3.fromRGB(60,60,180), function()
+    if lockRunning then return end
+    lockRunning=true; lockStatus.Text="🔒 กำลัง Lock 75%"
+    task.spawn(function()
+        while lockRunning do pcall(function() UpdateProgress:FireServer(75) end); task.wait(1) end
+    end)
+end)
+addBtn(lockPage, "🔓  หยุด Lock", Color3.fromRGB(100,60,20), function()
+    lockRunning=false; lockStatus.Text="ปิดอยู่"
 end)
 
-catchBtn.MouseButton1Click:Connect(function()
-    if closed then return end
-    local anySelected = false
-    for _, v in next, selectedRarities do if v then anySelected = true; break end end
-    if not anySelected then catchLabel.Text="⚠️ เลือก Rarity ก่อน!"; catchLabel.TextColor3=Color3.fromRGB(255,80,80); return end
-    catchRunning = not catchRunning
-    if catchRunning then
-        catchBtn.Text="⏹  หยุด Auto Catch"; catchBtn.BackgroundColor3=Color3.fromRGB(180,50,50); catchLabel.TextColor3=Color3.fromRGB(0,255,128)
-        task.spawn(function()
-            while catchRunning and not closed do
-                local pets = petsFolder:GetChildren()
-                if #pets == 0 then catchLabel.Text="🐾 รอ pet spawn..."; task.wait(1); continue end
-                for _, pet in next, pets do
-                    if not catchRunning or closed then break end
-                    local rar = pet:GetAttribute("Rarity") or ""
-                    if not selectedRarities[rar] then continue end
-                    local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                    if not hrp then task.wait(1); continue end
-                    local petCF = pet:GetPivot()
-                    local petName = pet:GetAttribute("Name") or pet.Name:sub(1,8)
-                    catchLabel.Text="✨ จับ ["..rar.."] "..petName
-                    hrp.CFrame = petCF * CFrame.new(0,3,4); task.wait(0.3)
-                    local dir = (petCF.Position - hrp.Position).Unit
-                    pcall(function() ThrowLasso:FireServer(0.9, dir) end); task.wait(0.3)
-                    pcall(function() minigameRequest:InvokeServer(pet, petCF) end)
-                    local t = tick()
-                    while catchRunning and not closed and pet and pet.Parent do
-                        pcall(function() UpdateProgress:FireServer(75) end)
-                        task.wait(0.5); if tick()-t > 5 then break end
-                    end
-                    task.wait(0.3)
+-- ========== TAB: Catch ==========
+local catchPage = newTab("🐾", "Catch")
+addLabel(catchPage, "Auto Catch")
+local catchStatus = addStatus(catchPage, "ปิดอยู่")
+addToggle(catchPage, "Common", function(v) selectedRarities.Common=v end)
+addToggle(catchPage, "Divine", function(v) selectedRarities.Divine=v end)
+addBtn(catchPage, "🐾  Auto Catch (เปิด)", Color3.fromRGB(150,100,0), function()
+    if catchRunning then return end
+    local any=false; for _,v in next, selectedRarities do if v then any=true; break end end
+    if not any then catchStatus.Text="⚠️ เลือก Rarity ก่อน!"; return end
+    catchRunning=true; catchStatus.Text="🐾 กำลังจับ..."
+    task.spawn(function()
+        while catchRunning do
+            local pets=petsFolder:GetChildren()
+            if #pets==0 then catchStatus.Text="รอ pet spawn..."; task.wait(1); continue end
+            for _, pet in next, pets do
+                if not catchRunning then break end
+                local rar=pet:GetAttribute("Rarity") or ""
+                if not selectedRarities[rar] then continue end
+                local hrp=LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if not hrp then task.wait(1); continue end
+                local petCF=pet:GetPivot()
+                catchStatus.Text="✨ ["..rar.."] "..(pet:GetAttribute("Name") or "?")
+                hrp.CFrame=petCF*CFrame.new(0,3,4); task.wait(0.3)
+                pcall(function() ThrowLasso:FireServer(0.9,(petCF.Position-hrp.Position).Unit) end); task.wait(0.3)
+                pcall(function() minigameRequest:InvokeServer(pet,petCF) end)
+                local t=tick()
+                while catchRunning and pet and pet.Parent do
+                    pcall(function() UpdateProgress:FireServer(75) end)
+                    task.wait(0.5); if tick()-t>5 then break end
                 end
                 task.wait(0.3)
             end
-            if not closed then catchBtn.Text="🐾  Auto Catch Pet"; catchBtn.BackgroundColor3=Color3.fromRGB(180,120,0); catchLabel.Text="🐾 Auto Catch: ปิดอยู่"; catchLabel.TextColor3=Color3.fromRGB(180,180,180) end
-        end)
-    else
-        catchBtn.Text="🐾  Auto Catch Pet"; catchBtn.BackgroundColor3=Color3.fromRGB(180,120,0)
-        catchLabel.Text="🐾 Auto Catch: ปิดอยู่"; catchLabel.TextColor3=Color3.fromRGB(180,180,180)
-    end
+            task.wait(0.3)
+        end
+        catchStatus.Text="ปิดอยู่"
+    end)
 end)
+addBtn(catchPage, "⏹  หยุด Auto Catch", Color3.fromRGB(160,40,40), function()
+    catchRunning=false; catchStatus.Text="ปิดอยู่"
+end)
+
+-- ========== CONTROLS ==========
+local minimized = false
+minBtn.MouseButton1Click:Connect(function()
+    minimized = not minimized
+    contentArea.Visible = not minimized
+    sidebar.Visible = not minimized
+    divider.Visible = not minimized
+    win.Size = minimized and UDim2.new(0,320,0,40) or UDim2.new(0,320,0,480)
+end)
+maxBtn.MouseButton1Click:Connect(function()
+    win.Size = UDim2.new(0,400,0,560)
+    contentArea.Visible = true; sidebar.Visible = true; divider.Visible = true; minimized = false
+end)
+closeB.MouseButton1Click:Connect(function()
+    closed=true; running=false; lockRunning=false; catchRunning=false; gui:Destroy()
+end)
+
+-- เปิด tab แรก
+tabBtns["Feed"].btn:MouseButton1Click()
