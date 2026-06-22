@@ -2,7 +2,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LocalPlayer = Players.LocalPlayer
 
-local Foods = {"Banana","Cave Mushroom","Cosmic Fruit","Volcanic Fruit","Heart Chocolate","Bloodmoon Grape","Tuna Fish","Dog Treat","Taco","Alien Fruit","Chocolate Egg","Radioactive Strawberry","Cotton Candy","Waffle","Star","Bag Of Worms","Pepper","Abyss Crystal","Steak","Rocky Cookie"}
+local Foods = {"Banana","Cave Mushroom","Cosmic Fruit","Volcanic Fruit","Heart Chocolate","Bloodmoon Grape","Tuna Fish","Dog Treat","Taco","Alien Fruit","Chocolate Egg","Radioactive Strawberry","Cotton Candy","Waffle","Star","Bag Of Worms","Pepper","Abyss Crystal","Steak","Rocky Cookie","Mango"}
 
 if LocalPlayer.PlayerGui:FindFirstChild("FoodGui") then LocalPlayer.PlayerGui.FoodGui:Destroy() end
 
@@ -131,20 +131,19 @@ foodBtn.MouseButton1Click:Connect(function()
 
     for _, v2 in next, Foods do
         if closed then break end
-        for i = 1, 50 do
+        for i = 1, 30 do
             if closed then break end
             for id, d in next, checkboxes do
                 if closed then break end
                 if d.selected then
                     pcall(function() ReplicatedStorage.Packages._Index["sleitnick_knit@1.7.0"].knit.Services.FoodService.RF.FeedPet:InvokeServer(v2, id, 0/0) end)
                     totalCount+=1
-                    if not closed then statusL.Text=v2.." "..i.."/50 → "..getDisplayName(d.obj) end
-                    task.wait(0.05)
+                    if not closed then statusL.Text=v2.." "..i.."/30 → "..getDisplayName(d.obj) end
+                    task.wait()
                 end
             end
         end
-        if not closed then statusL.Text="✅ "..v2.." ครบ 50 แล้ว" end
-        task.wait(0.05)
+        if not closed then statusL.Text="✅ "..v2.." ครบ 30 แล้ว" end
     end
 
     if not closed then statusL.Text="✅ เสร็จ! ("..totalCount.." ครั้ง)"; foodBtn.Text="▶  เริ่มให้อาหาร"; foodBtn.BackgroundColor3=Color3.fromRGB(0,180,80); running=false end
