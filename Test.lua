@@ -58,7 +58,7 @@ for _, rarity in next, Rarities do
 end
 
 local catchLabel = makeLabel("🐾 Auto Catch: ปิดอยู่", UDim2.new(0,5,0,504))
-local catchBtn   = makeBtn("🐾  Auto Catch Pet",        UDim2.new(0,8,0,492), UDim2.new(1,-16,0,42), Color3.fromRGB(180,120,0))
+local catchBtn   = makeBtn("🐾  Auto Catch Pet", UDim2.new(0,8,0,492), UDim2.new(1,-16,0,42), Color3.fromRGB(180,120,0))
 
 -- ========== LOGIC ==========
 local checkboxes, connections = {}, {}
@@ -124,41 +124,30 @@ closeBtn.MouseButton1Click:Connect(function()
     for _, c in next, connections do c:Disconnect() end; gui:Destroy()
 end)
 
--- ========== FOOD (วนจนติด buff) ==========
 foodBtn.MouseButton1Click:Connect(function()
     if running or closed then return end
     running=true; foodBtn.Text="⏳  กำลังให้อาหาร..."; foodBtn.BackgroundColor3=Color3.fromRGB(180,100,0)
-    local totalCount = 0
+    local totalCount=0
 
     for _, v2 in next, Foods do
         if closed then break end
-        local keepFeeding = true
-        while keepFeeding and not closed do
-            local anyFed = false
+        for i = 1, 50 do
+            if closed then break end
             for id, d in next, checkboxes do
                 if closed then break end
                 if d.selected then
-                    local ok, result = pcall(function()
-                        return ReplicatedStorage.Packages._Index["sleitnick_knit@1.7.0"].knit.Services.FoodService.RF.FeedPet:InvokeServer(v2, id, 0/0)
-                    end)
-                    if ok and result == true then
-                        anyFed = true
-                        totalCount += 1
-                        if not closed then statusL.Text = v2.." → "..getDisplayName(d.obj) end
-                    end
+                    pcall(function() ReplicatedStorage.Packages._Index["sleitnick_knit@1.7.0"].knit.Services.FoodService.RF.FeedPet:InvokeServer(v2, id, 0/0) end)
+                    totalCount+=1
+                    if not closed then statusL.Text=v2.." "..i.."/50 → "..getDisplayName(d.obj) end
                     task.wait(0.05)
                 end
             end
-            if not anyFed then keepFeeding = false end
         end
-        if not closed then statusL.Text = "✅ "..v2.." เต็มแล้ว ("..totalCount..")" end
+        if not closed then statusL.Text="✅ "..v2.." ครบ 50 แล้ว" end
         task.wait(0.05)
     end
 
-    if not closed then
-        statusL.Text="✅ เสร็จทั้งหมด! ("..totalCount.." ครั้ง)"
-        foodBtn.Text="▶  เริ่มให้อาหาร"; foodBtn.BackgroundColor3=Color3.fromRGB(0,180,80); running=false
-    end
+    if not closed then statusL.Text="✅ เสร็จ! ("..totalCount.." ครั้ง)"; foodBtn.Text="▶  เริ่มให้อาหาร"; foodBtn.BackgroundColor3=Color3.fromRGB(0,180,80); running=false end
 end)
 
 lockBtn.MouseButton1Click:Connect(function()
