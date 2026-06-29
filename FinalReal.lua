@@ -2,7 +2,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LocalPlayer = Players.LocalPlayer
 
-local Foods = {"Backrooms Cofee","Banana","Cave Mushroom","Cosmic Fruit","Volcanic Fruit","Heart Chocolate","Bloodmoon Grape","Tuna Fish","Dog Treat","Taco","Alien Fruit","Chocolate Egg","Radioactive Strawberry","Cotton Candy","Waffle","Star","Bag Of Worms","Pepper","Abyss Crystal","Rocky Cookie","Mango"}
+local Foods = {"Backrooms Coffee","Banana","Cave Mushroom","Cosmic Fruit","Volcanic Fruit","Heart Chocolate","Bloodmoon Grape","Tuna Fish","Dog Treat","Taco","Alien Fruit","Chocolate Egg","Radioactive Strawberry","Cotton Candy","Waffle","Star","Bag Of Worms","Pepper","Abyss Crystal","Rocky Cookie","Mango"}
 
 local MutationFoodMap = {
     Dusty        = "Banana",
@@ -24,7 +24,7 @@ local MutationFoodMap = {
     Spiced       = "Pepper",
     Void         = "Abyss Crystal",
     Rocky        = "Rocky Cookie",
-    Corrupted    = "Backrooms Cofee",
+    Corrupted    = "Backrooms Coffee",
 }
 
 local Remotes = ReplicatedStorage:WaitForChild("Remotes")
